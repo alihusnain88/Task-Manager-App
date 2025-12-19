@@ -68,9 +68,9 @@ const BoardItem: React.FC<BoardItemProps> = ({
         </Typography>
 
         <IconButton onClick={onDelete} size="small">
-          <DeleteIcon fontSize="small" />
+          <DeleteIcon fontSize="small"/>
         </IconButton>
-      </Box>
+      </Box> 
     </Container>
   );
 };

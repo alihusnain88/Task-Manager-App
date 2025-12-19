@@ -5,14 +5,14 @@ import BoardsList from "../boards/BoardsList";
 import AddBoardDialog from "../boards/AddBoardDialog";
 import ThemeToggleButtons from "../../theme/ThemeToggleButtons";
 import { useDispatch, useSelector } from "react-redux";
-import { type RootState } from "../../store";
+import type { AppDispatch, RootState } from "../../store";
 import { deleteBoard, setActiveBoardID } from "../../store/slices/boardsSlice";
 import { deleteTasksForBoard } from "../../store/slices/tasksSlice";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const boardsList = useSelector((state: RootState) => state.boards.list);
   const activeBoardID = useSelector(

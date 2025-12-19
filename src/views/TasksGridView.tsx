@@ -6,8 +6,6 @@ import {
   Typography,
   Dialog,
   DialogContent,
-  Chip,
-  Stack,
   Link,
 } from "@mui/material";
 import {
@@ -22,7 +20,6 @@ import { selectAllTasksForGrid } from "../store/selectors/tasksGridSelectors";
 import type { TaskGridRow } from "../types";
 import {
   fetchBoards,
-  setBoards,
   updateBoardName,
 } from "../store/slices/boardsSlice";
 import { fetchTasksByBoard, updateTask } from "../store/slices/tasksSlice";
@@ -31,7 +28,6 @@ import {
   setColumnVisibility,
 } from "../store/slices/gridStateSlice";
 import { type Task } from "../types";
-// import CustomToolbar from "./CustomToolbar";
 import { getTagColor } from "../components/tasks/TaskCard";
 
 const TasksGridView = () => {
