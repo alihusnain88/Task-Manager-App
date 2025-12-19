@@ -51,17 +51,10 @@ const App: React.FC = () => {
 
     dispatch(fetchTasksByBoard(board));
   }, [activeBoardID, boards, dispatch]);
+  
 
-  const handleAddBoard = (newBoard: Board) => {
-    dispatch(addBoard(newBoard));
-    dispatch(setActiveBoardID(newBoard.id));
-  };
 
-  const handleDeleteBoard = (boardID: string) => {
-    dispatch(deleteBoard(boardID));
-  };
-
-  const handleAddTask = (newTask: Task, isEdit = false) => {
+  const handleAddTask = (newTask: Task) => {
     if (!activeBoardID) return;
     dispatch(addTask({ boardID: activeBoardID, task: newTask }));
   };
@@ -124,9 +117,7 @@ const App: React.FC = () => {
           <MainPanel
             tasks={tasks}
             onAddTask={handleAddTask}
-            
           />
-          {/* <TasksGridView /> */}
         </Box>
       </Box>
     </Box>
