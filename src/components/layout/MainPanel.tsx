@@ -1,10 +1,10 @@
 import { Container, useTheme } from "@mui/material";
-import React, { useState } from "react";
+import React from "react";
 import TaskColumn from "../tasks/TaskColumn";
 import AddTaskDialog from "../tasks/AddTaskDialog";
 import { type Task } from "../../types";
 import { useDispatch, useSelector } from "react-redux";
-import { type RootState, type AppDispatch } from "../../store";
+import type { AppDispatch, RootState} from "../../store";
 import {
   openAddTaskDialog,
   openEditTaskDialog,
@@ -26,7 +26,7 @@ interface MainPanelProps {
 const MainPanel: React.FC<MainPanelProps> = ({
   tasks,
 }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
 
   const isOpen = useSelector(
@@ -73,7 +73,7 @@ const MainPanel: React.FC<MainPanelProps> = ({
         isOpen={isOpen}
         setIsOpen={(open) => {
           if (!open) dispatch(closeTaskDialog());
-        }}
+        }} 
         task={editingTask} 
       />
     </Container>
