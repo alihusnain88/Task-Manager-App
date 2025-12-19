@@ -71,13 +71,25 @@ const boardsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchBoards.fulfilled, (state, action) => {
-        state.loading = false;
-        state.list = action.payload.map((b) => ({ ...b, id: String(b.id) }));
+  state.loading = false;
+  
+  // 1. Format the API boards
+  const apiBoards = action.payload.map((b: any) => ({ ...b, id: String(b.id) }));
 
-        if (action.payload.length > 0) {
-          state.activeBoardID = action.payload[0].id;
-        }
-      })
+  // 2. Identify boards that are ONLY in your local state (User Created)
+  // We assume a board is "User Created" if its ID doesn't exist in the API response
+  const userCreatedBoards = state.list.filter(
+    (existingBoard) => !apiBoards.find((apiB) => apiB.id === existingBoard.id)
+  );
+
+  // 3. Combine them: API boards first, then User boards
+  state.list = [...apiBoards, ...userCreatedBoards];
+
+  // 4. Don't lose your persisted activeBoardID
+  if (!state.activeBoardID && state.list.length > 0) {
+    state.activeBoardID = state.list[0].id;
+  }
+})
       .addCase(fetchBoards.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload ?? "Unknown error";
