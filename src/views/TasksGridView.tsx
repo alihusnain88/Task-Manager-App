@@ -41,7 +41,7 @@ import {
 import { getTagColor } from "../utils/tagColorsHelper";
 
 const TasksGridView = () => {
-  const apiRef = useGridApiRef();
+  const apiRef = useGridApiRef(); 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const prevOrderRef = useRef<string[]>([]);
@@ -68,13 +68,13 @@ const TasksGridView = () => {
   const memoizedColumnOrder = useMemo(() => {
     if (
       Array.isArray(columnOrder) &&
-      columnOrder.length > 0 &&
+      columnOrder.length > 0 && 
       typeof columnOrder[0] === "string"
     ) {
       return columnOrder;
     }
-    return undefined;
-  }, [columnOrder]);
+    return undefined; 
+  }, [columnOrder]); 
 
   useEffect(() => {
     dispatch(fetchBoards());
@@ -91,16 +91,16 @@ const TasksGridView = () => {
 
     const currentOrder = apiRef.current.getAllColumns().map((col) => col.field);
 
-    const isSame =
+    const isSame = 
       currentOrder.length === memoizedColumnOrder.length &&
-      currentOrder.every((field, i) => field === memoizedColumnOrder[i]);
+      currentOrder.every((field, i) => field === memoizedColumnOrder[i]); 
 
     if (!isSame) {
       apiRef.current.setState((state) => ({
         ...state,
         columns: {
           ...state.columns,
-          orderedFields: memoizedColumnOrder,
+          orderedFields: memoizedColumnOrder, 
         },
       }));
     }
@@ -127,7 +127,7 @@ const TasksGridView = () => {
       if (newRow.projectName !== oldRow.projectName) {
         dispatch(
           updateBoardName({
-            boardID: newRow.projectID,
+            boardID: newRow.projectID, 
             name: newRow.projectName,
           })
         );
@@ -156,7 +156,7 @@ const TasksGridView = () => {
           component="button"
           variant="body2"
           onClick={() => navigate(`/projects/${params.row.projectID}`)}
-          sx={{ textAlign: "left", fontWeight: "medium" }}
+          sx={{ textAlign: "left", fontWeight: "medium", textDecoration: 'none'}}
         >
           {params.value}
         </Link>
@@ -330,7 +330,7 @@ const TasksGridView = () => {
               title: params.row.taskTitle,
               status: params.row.status,
               tags: [...params.row.tags],
-              background: params.row.background,
+              background: params.row.background, 
             };
             dispatch(
               addTask({
@@ -389,7 +389,7 @@ const TasksGridView = () => {
           dispatch(setColumnVisibility(lockedModel));
           localStorage.setItem("columnVisibility", JSON.stringify(lockedModel));
         }}
-        onRowClick={(params) => handleRowClick(Number(params.id))}
+        // onRowClick={(params) => handleRowClick(Number(params.id))}
         getRowClassName={(params) =>
           selectedRowID === params.id ? "selected-row" : ""
         }
@@ -428,7 +428,7 @@ const TasksGridView = () => {
               style={{ maxWidth: "100%", height: "100%" }}
             />
           )}
-        </DialogContent>
+        </DialogContent> 
       </Dialog>
     </Box>
   );

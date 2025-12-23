@@ -20,13 +20,13 @@ const initialState: BoardsState = {
 };
 
 export const fetchBoards = createAsyncThunk(
-  "boards/fetchBoards",
+  "boards/fetchBoards", 
   async (_, thunkAPI) => {
     try {
       const res = await fetch(
         "https://raw.githubusercontent.com/devchallenges-io/curriculum/refs/heads/main/4-frontend-libaries/challenges/group_1/data/task-manager/list.json"
       );
-      if (!res.ok) throw new Error("Failed to fetch boards");
+      if (!res.ok) throw new Error("Failed to fetch boards"); 
 
       const data = await res.json();
       return data;

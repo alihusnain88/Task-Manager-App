@@ -21,15 +21,15 @@ const Sidebar = () => {
 
   const handleSelect = (id: string) => {
     dispatch(setActiveBoardID(id));
-  };
+  }; 
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: string) => { 
     dispatch(deleteBoard(id));
     dispatch(deleteTasksForBoard(id));
   };
 
   return (
-    <Box
+    <Box 
       sx={{
         minHeight: "100%",
         overflowY: "auto",
@@ -58,8 +58,8 @@ const Sidebar = () => {
             m: 1,
             textTransform: "none",
             color: theme.palette.text.primary,
-            background: "none",
-            fontSize: "0.9rem",
+            background: "none", 
+            fontSize: "0.9rem", 
             "&:hover": { backgroundColor: theme.palette.action.selected },
           }}
         >

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Box, Container, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import Sidebar from "./components/layout/Sidebar";
 import MainPanel from "./components/layout/MainPanel";
 import { useSelector, useDispatch } from "react-redux";
@@ -35,11 +35,11 @@ const App = () => {
 
   const handleAddTask = (newTask: Task) => {
     if (!activeBoardID) return;
-    dispatch(addTask({ boardID: activeBoardID, task: newTask }));
+    dispatch(addTask({ boardID: activeBoardID, task: newTask })); 
   };
 
   return (
-    <Container disableGutters
+    <Box
       sx={{
         width: "100vw",
         height: "100vh",
@@ -62,9 +62,9 @@ const App = () => {
           mb: 2,
           fontWeight: "bold",
           color: theme.palette.text.primary,
-        }}
+        }} 
       >
-        Task Manager App
+        Task Manager App 
       </Typography>
 
       <Box
@@ -76,12 +76,12 @@ const App = () => {
           p: "10px",
           background: "linear-gradient(175deg, #1d244e 0%, #5f2c3f 100%)",
           boxShadow: theme.shadows[4],
-          display: "flex",
+          display: "flex",  
         }}
       >
         <Box
           sx={{
-            flex: 1,
+            flex: 1, 
             backgroundColor: theme.palette.background.paper,
             border: "8px solid #1c1c1e",
             borderRadius: "15px",
@@ -90,10 +90,10 @@ const App = () => {
           }}
         >
           <Sidebar />
-          <MainPanel tasks={tasks} onAddTask={handleAddTask} />
-        </Box>
+          <MainPanel tasks={tasks} onAddTask={handleAddTask} /> 
+        </Box> 
       </Box>
-    </Container>
+    </Box>
   );
 };
 

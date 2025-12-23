@@ -108,7 +108,7 @@ const tasksSlice = createSlice({
       const tasks = state.byBoardID[boardID];
       if (!tasks) return;
 
-      const task = tasks.find((t) => t.id === taskID);
+      const task = tasks.find((t) => String(t.id) === taskID);
       if (task) {
         task.status = newStatus;
       }

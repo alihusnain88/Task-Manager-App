@@ -12,7 +12,7 @@ const TaskCard = ({ task, onClick }: TaskCardProps) => {
   const theme = useTheme();
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.setData("taskID", task.id);
+    e.dataTransfer.setData("taskID", String(task.id));
     e.dataTransfer.setData("taskStatus", task.status);
   };
 
