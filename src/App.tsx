@@ -39,7 +39,7 @@ const App = () => {
   };
 
   return (
-    <Box
+    <Container disableGutters
       sx={{
         width: "100vw",
         height: "100vh",
@@ -93,7 +93,7 @@ const App = () => {
           <MainPanel tasks={tasks} onAddTask={handleAddTask} />
         </Box>
       </Box>
-    </Box>
+    </Container>
   );
 };
 
