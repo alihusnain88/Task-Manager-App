@@ -5,7 +5,7 @@ interface GridState {
 }
 
 const initialState: GridState = {
-  columnOrder: [], 
+  columnOrder: [],
   columnVisibility: {},
 };
 

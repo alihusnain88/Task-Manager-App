@@ -1,4 +1,8 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
 import { type Board } from "../../types";
 
 interface BoardsState {
@@ -36,11 +40,11 @@ const boardsSlice = createSlice({
   name: "boards",
   initialState,
   reducers: {
-    setActiveBoardID: (state, action) => {
+    setActiveBoardID: (state, action: PayloadAction<string>) => {
       state.activeBoardID = action.payload;
     },
 
-    addBoard: (state, action) => {
+    addBoard: (state, action: PayloadAction<Board>) => {
       state.list.push(action.payload);
       state.activeBoardID = action.payload.id;
     },
@@ -51,17 +55,15 @@ const boardsSlice = createSlice({
       const board = state.list.find((b) => b.id === action.payload.boardID);
       if (board) board.name = action.payload.name;
     },
-    deleteBoard: (state, action) => {
+    deleteBoard: (state, action: PayloadAction<string>) => {
       state.list = state.list.filter((curr) => curr.id !== action.payload);
       if (state.activeBoardID === action.payload) {
         state.activeBoardID = state.list[0]?.id ?? null;
       }
     },
-    setBoards: (state, action) => {
+    setBoards: (state, action: PayloadAction<Board[]>) => {
       state.list = action.payload;
-      if (state.activeBoardID === null && action.payload.length > 0) {
-        state.activeBoardID = action.payload[0].id;
-      }
+      state.activeBoardID = action.payload[0].id
     },
   },
   extraReducers: (builder) => {
@@ -71,25 +73,24 @@ const boardsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchBoards.fulfilled, (state, action) => {
-  state.loading = false;
-  
-  // 1. Format the API boards
-  const apiBoards = action.payload.map((b: any) => ({ ...b, id: String(b.id) }));
+        state.loading = false;
 
-  // 2. Identify boards that are ONLY in your local state (User Created)
-  // We assume a board is "User Created" if its ID doesn't exist in the API response
-  const userCreatedBoards = state.list.filter(
-    (existingBoard) => !apiBoards.find((apiB) => apiB.id === existingBoard.id)
-  );
+        const apiBoards = action.payload.map((b: any) => ({
+          ...b,
+          id: String(b.id),
+        }));
 
-  // 3. Combine them: API boards first, then User boards
-  state.list = [...apiBoards, ...userCreatedBoards];
+        const userCreatedBoards = state.list.filter(
+          (existingBoard) =>
+            !apiBoards.find((apiB: Board) => apiB.id === existingBoard.id)
+        );
 
-  // 4. Don't lose your persisted activeBoardID
-  if (!state.activeBoardID && state.list.length > 0) {
-    state.activeBoardID = state.list[0].id;
-  }
-})
+        state.list = [...apiBoards, ...userCreatedBoards];
+
+        if (!state.activeBoardID && state.list.length > 0) {
+          state.activeBoardID = state.list[0].id;
+        }
+      })
       .addCase(fetchBoards.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload ?? "Unknown error";
@@ -97,6 +98,11 @@ const boardsSlice = createSlice({
   },
 });
 
-export const { setActiveBoardID, addBoard, updateBoardName, deleteBoard, setBoards} =
-  boardsSlice.actions;
+export const {
+  setActiveBoardID,
+  addBoard,
+  updateBoardName,
+  deleteBoard,
+  setBoards,
+} = boardsSlice.actions;
 export default boardsSlice.reducer;

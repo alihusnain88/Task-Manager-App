@@ -4,7 +4,7 @@ import TaskColumn from "../tasks/TaskColumn";
 import AddTaskDialog from "../tasks/AddTaskDialog";
 import { type Task } from "../../types";
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState} from "../../store";
+import type { AppDispatch, RootState } from "../../store";
 import {
   openAddTaskDialog,
   openEditTaskDialog,
@@ -23,9 +23,7 @@ interface MainPanelProps {
   onAddTask: (task: Task, isEdit: boolean) => void;
 }
 
-const MainPanel: React.FC<MainPanelProps> = ({
-  tasks,
-}) => {
+const MainPanel = ({ tasks }: MainPanelProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
 
@@ -45,7 +43,6 @@ const MainPanel: React.FC<MainPanelProps> = ({
   return (
     <Container
       sx={{
-        
         minHeight: "100%",
         overflow: "scroll",
         scrollbarWidth: "none",
@@ -54,7 +51,7 @@ const MainPanel: React.FC<MainPanelProps> = ({
         borderRadius: "10px",
         display: "flex",
         padding: 2,
-        gap: 0.8
+        gap: 0.8,
       }}
     >
       {COLUMNS.map((col) => (
@@ -73,12 +70,11 @@ const MainPanel: React.FC<MainPanelProps> = ({
         isOpen={isOpen}
         setIsOpen={(open) => {
           if (!open) dispatch(closeTaskDialog());
-        }} 
-        task={editingTask} 
+        }}
+        task={editingTask}
       />
     </Container>
   );
 };
 
 export default MainPanel;
-

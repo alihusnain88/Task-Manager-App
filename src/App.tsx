@@ -1,24 +1,14 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import Sidebar from "./components/layout/Sidebar";
 import MainPanel from "./components/layout/MainPanel";
 import { useSelector, useDispatch } from "react-redux";
 import { type RootState, type AppDispatch } from "./store";
-import {
-  fetchBoards,
-  setActiveBoardID,
-  addBoard,
-  deleteBoard,
-} from "./store/slices/boardsSlice";
-import {
-  fetchTasksByBoard,
-  addTask,
-  moveTask,
-} from "./store/slices/tasksSlice";
-import { type Task, type Board } from "./types";
-import TasksGridView from "./views/TasksGridView";
+import { fetchBoards } from "./store/slices/boardsSlice";
+import { fetchTasksByBoard, addTask } from "./store/slices/tasksSlice";
+import { type Task } from "./types";
 
-const App: React.FC = () => {  
+const App = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -32,16 +22,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchBoards());
-  }, [dispatch]);
-  // --------------------
-  useEffect(() => {
-  if (boards.length === 0) return;
-
-  boards.forEach((board) => {
-    dispatch(fetchTasksByBoard(board));
-  });
-}, [boards, dispatch]);
-// ----------------------
+  }, []);
 
   useEffect(() => {
     if (!activeBoardID || boards.length === 0) return;
@@ -50,16 +31,12 @@ const App: React.FC = () => {
     if (!board) return;
 
     dispatch(fetchTasksByBoard(board));
-  }, [activeBoardID, boards, dispatch]);
-  
-
+  }, [activeBoardID, boards]);
 
   const handleAddTask = (newTask: Task) => {
     if (!activeBoardID) return;
     dispatch(addTask({ boardID: activeBoardID, task: newTask }));
   };
-
-
 
   return (
     <Box
@@ -95,10 +72,10 @@ const App: React.FC = () => {
           width: "80%",
           height: "83vh",
           maxWidth: "1600px",
-          borderRadius: "20px",
+          borderRadius: theme.shape.borderRadius,
           p: "10px",
           background: "linear-gradient(175deg, #1d244e 0%, #5f2c3f 100%)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.37)",
+          boxShadow: theme.shadows[4],
           display: "flex",
         }}
       >
@@ -114,10 +91,7 @@ const App: React.FC = () => {
         >
           <Sidebar />
 
-          <MainPanel
-            tasks={tasks}
-            onAddTask={handleAddTask}
-          />
+          <MainPanel tasks={tasks} onAddTask={handleAddTask} />
         </Box>
       </Box>
     </Box>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -20,9 +20,9 @@ import { useTheme } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { type RootState, type AppDispatch } from "../../store";
 import { addTask, updateTask } from "../../store/slices/tasksSlice";
-import { STATUS_DOTS } from "./TaskColumn";
+import { STATUS_DOTS } from "../../utils/coloredDotsHelper";
 import { Link } from "react-router";
-
+import { getTagColor } from "../../utils/tagColorsHelper";
 interface AddTaskDialogProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -36,21 +36,7 @@ const STATUS_OPTIONS: { key: TaskStatus; label: string }[] = [
   { key: "completed", label: "Completed" },
 ];
 
-const getTagColor = (tag: string) => {
-  const t = tag.toLowerCase();
-  if (t.includes("technical") || t.includes("react"))
-    return { bg: "#dbeafe", text: "#1e40af" };
-  if (t.includes("design") || t.includes("concept"))
-    return { bg: "#fce7f3", text: "#9d174d" };
-  if (t.includes("front")) return { bg: "#dcfce7", text: "#166534" };
-  return { bg: "#e2e8f0", text: "#475569" };
-};
-
-const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
-  isOpen,
-  setIsOpen,
-  task,
-}) => {
+const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   const activeBoardID = useSelector(
@@ -134,21 +120,25 @@ const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
       open={isOpen}
       onClose={() => setIsOpen(false)}
       maxWidth={false}
-      BackdropProps={{ sx: { backgroundColor: "transparent" } }}
-      PaperProps={{
-        sx: {
-          position: "fixed",
-          right: 30,
-          top: "35%",
-          width: "20vw",
-          maxHeight: "60vh",
-          borderRadius: "20px",
-          background: `
+      slotProps={{
+        backdrop: {
+          sx: { backgroundColor: "transparent" },
+        },
+        paper: {
+          sx: {
+            position: "fixed",
+            right: 30,
+            top: "35%",
+            width: "20vw",
+            maxHeight: "60vh",
+            borderRadius: "20px",
+            background: `
             linear-gradient(#121212, #121212) padding-box,
             linear-gradient(160deg, #1d244e, #5f2c3f) border-box
           `,
-          border: "6px solid transparent",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.6)",
+            border: "6px solid transparent",
+            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.6)",
+          },
         },
       }}
     >
@@ -160,25 +150,31 @@ const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
           background: theme.palette.background.default,
         }}
       >
-        
-
         <DialogTitle
           sx={{
             color: "#cecaca",
             display: "flex",
             justifyContent: "space-between",
+            alignItems: "center",
             px: 2,
-            fontSize: "0.8rem",
+            fontSize: 14,
             fontWeight: "bold",
             pb: 1,
           }}
         >
           Task Details
           <Link to={`tasks/${task?.id}`}>
-          <Typography
-            sx={{ textAlign: "center", color: '#fff', textDecoration: 'underline'}}
-          >Open</Typography>
-        </Link>
+            <Typography
+              sx={{
+                textAlign: "center",
+                color: "#fff",
+                textDecoration: "underline",
+                fontSize: 14,
+              }}
+            >
+              Open
+            </Typography>
+          </Link>
           <IconButton onClick={() => setIsOpen(false)} size="small">
             <CloseIcon />
           </IconButton>
@@ -375,9 +371,7 @@ const AddTaskDialog: React.FC<AddTaskDialogProps> = ({
                 <Chip
                   key={tag}
                   label={tag}
-                  onDelete={() =>
-                    setTags(tags.filter((existing) => existing !== tag))
-                  }
+                  onDelete={() => setTags(tags.filter((curr) => curr !== tag))}
                   sx={{
                     bgcolor: style.bg,
                     color: style.text,

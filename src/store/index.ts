@@ -1,6 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage"; 
+import storage from "redux-persist/lib/storage";
 import boardsReducer from "./slices/boardsSlice";
 import tasksReducer from "./slices/tasksSlice";
 import gridStateReducer from "./slices/gridStateSlice";
@@ -9,7 +9,7 @@ import themeReducer from "./slices/themeSlice";
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["theme", "boards", "tasks"], 
+  whitelist: ["theme", "boards", "tasks", "gridState"],
 };
 
 const rootReducer = combineReducers({
@@ -25,7 +25,7 @@ export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, 
+      serializableCheck: false,
     }),
 });
 

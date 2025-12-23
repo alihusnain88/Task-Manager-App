@@ -1,28 +1,41 @@
-import { useEffect, useState } from 'react';
-import { fetchBoardData } from '../api/boardsApi';
-import {type UseBoardDataResult} from '../types'
+import { useEffect, useState } from "react";
+import { fetchBoardData } from "../api/boardsApi";
+import { type Board, type UseBoardDataResult } from "../types";
 
-export default function useBoardData(boardLink: string | null): UseBoardDataResult {
-  const [boardData, setBoardData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+export default function useBoardData(
+  boardLink: string | null
+): UseBoardDataResult {
+  const [boardData, setBoardData] = useState<Board | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!boardLink) return; 
+    if (!boardLink) return;
 
-    setLoading(true);
-    setError("");
-
-    fetchBoardData(boardLink)
-      .then((data) => {
+    const link = boardLink; // Because boardLink was giving string | null typescript error
+    async function loadBoard() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchBoardData(link);
         setBoardData(data);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Error fetching board data");
+        }
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message || 'Error fetching board data');
-        setLoading(false);
-      });
+      }
+    }
+
+    loadBoard();
   }, [boardLink]);
 
-  return { boardData, loading, error };
+  return {
+    boardData: boardData ? { tasks: boardData.tasks || [] } : null,
+    loading,
+    error,
+  };
 }

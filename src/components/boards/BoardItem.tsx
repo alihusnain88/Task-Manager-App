@@ -1,8 +1,14 @@
 import React from "react";
-import { Typography, IconButton, Container, Box, useTheme } from "@mui/material";
+import {
+  Typography,
+  IconButton,
+  Container,
+  Box,
+  useTheme,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { type Board } from "../../types";
-import { randomLightColor } from "./AddBoardDialog";
+import { getLogoBackground } from "../../utils/logoBackgroundHelper";
 
 interface BoardItemProps {
   board: Board;
@@ -11,12 +17,7 @@ interface BoardItemProps {
   onDelete: () => void;
 }
 
-const BoardItem: React.FC<BoardItemProps> = ({
-  board,
-  isActive,
-  onSelect,
-  onDelete,
-}) => {
+const BoardItem = ({ board, isActive, onSelect, onDelete }: BoardItemProps) => {
   const theme = useTheme();
   const borderStyles = theme.custom.interactiveBorder;
 
@@ -52,7 +53,7 @@ const BoardItem: React.FC<BoardItemProps> = ({
             width: 30,
             height: 30,
             borderRadius: "50%",
-            backgroundColor: randomLightColor(),
+            backgroundColor: getLogoBackground(),
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -67,13 +68,18 @@ const BoardItem: React.FC<BoardItemProps> = ({
           {board.name}
         </Typography>
 
-        <IconButton onClick={onDelete} size="small">
-          <DeleteIcon fontSize="small"/>
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          size="small"
+        >
+          <DeleteIcon fontSize="small" />
         </IconButton>
-      </Box> 
+      </Box>
     </Container>
   );
 };
-
 
 export default BoardItem;

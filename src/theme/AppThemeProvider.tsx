@@ -1,4 +1,3 @@
-// AppThemeProvider.tsx
 import React, { useMemo, useContext } from "react";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
@@ -8,23 +7,24 @@ import { toggleMode } from "../store/slices/themeSlice";
 export const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
 
 export default function AppThemeProvider({ children }: { children: React.ReactNode }) {
-  const mode = useSelector((state: RootState) => state.theme.mode); // get mode from redux
+  const mode = useSelector((state: RootState) => state.theme.mode); 
   const dispatch = useDispatch<AppDispatch>();
 
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => dispatch(toggleMode()),
     }),
-    [dispatch]
+    [dispatch] 
   );
 
   const theme = useMemo(
     () =>
       createTheme({
         palette: {
-          mode,
+          mode: mode as 'dark' | 'light',
           ...(mode === "dark"
             ? {
+              customColor: {main: '#f09'},
                 primary: { main: "#2563eb", contrastText: "#ffffff" },
                 background: { default: "#2a2d32", paper: "#1c1c1e" },
                 text: { primary: "#ffffff", secondary: "rgba(255,255,255,0.7)" },
@@ -36,7 +36,7 @@ export default function AppThemeProvider({ children }: { children: React.ReactNo
               }),
         },
 
-        shape: { borderRadius: 12 },
+        shape: { borderRadius: 5 },
 
         shadows:
           mode === "dark"
@@ -129,8 +129,8 @@ export default function AppThemeProvider({ children }: { children: React.ReactNo
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
+        <CssBaseline /> 
+        {children} 
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

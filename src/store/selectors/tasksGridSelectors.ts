@@ -9,9 +9,7 @@ export const selectAllTasksForGrid = createSelector(
     (state: RootState) => state.tasks.byBoardID,
   ],
   (boards, tasksByBoard): TaskGridRow[] => {
-    const rows: TaskGridRow[] = [];
-    // const rows = mockRows
-    
+    const rows: TaskGridRow[] = [];    
 
     boards.forEach((board) => {
       const tasks = tasksByBoard[board.id] ?? [];

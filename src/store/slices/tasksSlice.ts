@@ -3,14 +3,14 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import { type Task, type Board } from "../../types";
+import { type Task, type Board, type TaskStatus } from "../../types";
 
 interface TasksState {
   byBoardID: Record<string, Task[]>;
   isTaskDialogOpen: boolean;
-  editingTask: Task | null;
-  loading: boolean;
-  error: string | null;
+  editingTask?: Task | null;
+  loading?: boolean;
+  error?: string | null;
 }
 
 const initialState: TasksState = {
@@ -61,39 +61,47 @@ const tasksSlice = createSlice({
 
     addTask: (
       state,
-      action: PayloadAction<{ boardID: string; task: Task }>
+      action: PayloadAction<{
+        boardID: string;
+        task: Task;
+        nearTaskID?: string;
+      }>
     ) => {
-      state.byBoardID[action.payload.boardID].push(action.payload.task);
+      const { boardID, task, nearTaskID } = action.payload;
+      if (!state.byBoardID[boardID]) {
+        state.byBoardID[boardID] = [];
+        return;
+      }
+      const index = state.byBoardID[boardID].findIndex(
+        (curr) => curr.id === nearTaskID
+      );
+
+      state.byBoardID[boardID].splice(index + 1, 0, task);
     },
 
     updateTask: (
-  state,
-  action: PayloadAction<{ boardID: string; task: Task; projectName?: string }>
-) => {
-  const { boardID, task, projectName } = action.payload;
-  const tasks = state.byBoardID[boardID];
-  if (!tasks) return;
+      state,
+      action: PayloadAction<{
+        boardID: string;
+        task: Task;
+      }>
+    ) => {
+      const { boardID, task } = action.payload;
+      const tasks = state.byBoardID[boardID];
+      if (!tasks) return;
 
-  const index = tasks.findIndex((t) => t.id === task.id);
-  if (index !== -1) {
-    tasks[index] = { ...tasks[index], ...task }; // update task properties
-  }
-
-  // Optionally update board name if provided
-  if (projectName) {
-    // Assuming you have a boards slice, you can dispatch another action to update board name
-    // or store board names in tasks state
-    // Example:
-    // state.boardNames[boardID] = projectName;
-  }
-},
+      const index = tasks.findIndex((t) => t.id === task.id);
+      if (index !== -1) {
+        tasks[index] = { ...tasks[index], ...task };
+      }
+    },
 
     moveTask: (
       state,
       action: PayloadAction<{
         boardID: string;
         taskID: string;
-        newStatus: Task["status"];
+        newStatus: TaskStatus;
       }>
     ) => {
       const { boardID, taskID, newStatus } = action.payload;
@@ -108,6 +116,16 @@ const tasksSlice = createSlice({
 
     deleteTasksForBoard: (state, action: PayloadAction<string>) => {
       delete state.byBoardID[action.payload];
+    },
+
+    deleteTaskByID: (
+      state,
+      action: PayloadAction<{ boardID: string; taskID: string }>
+    ) => {
+      const { boardID, taskID } = action.payload;
+      state.byBoardID[boardID] = state.byBoardID[boardID].filter(
+        (curr) => curr.id !== action.payload.taskID
+      );
     },
 
     openAddTaskDialog(state) {
@@ -132,19 +150,20 @@ const tasksSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchTasksByBoard.fulfilled, (state, action) => {
-  state.loading = false;
+        state.loading = false;
 
-  const existingTasks = state.byBoardID[action.payload.boardId] ?? [];
-  const fetchedTasks = action.payload.tasks;
+        const existingTasks = state.byBoardID[action.payload.boardId] ?? [];
+        const fetchedTasks = action.payload.tasks;
 
-  // Merge: existing user tasks first, then API tasks without duplicates
-  const mergedTasks = [
-    ...existingTasks,
-    ...fetchedTasks.filter(f => !existingTasks.some(e => e.id === f.id))
-  ];
+        const mergedTasks = [
+          ...existingTasks,
+          ...fetchedTasks.filter(
+            (f) => !existingTasks.some((e) => e.id === f.id)
+          ),
+        ];
 
-  state.byBoardID[action.payload.boardId] = mergedTasks;
-})
+        state.byBoardID[action.payload.boardId] = mergedTasks;
+      })
 
       .addCase(fetchTasksByBoard.rejected, (state, action) => {
         state.loading = false;
@@ -162,6 +181,7 @@ export const {
   openAddTaskDialog,
   openEditTaskDialog,
   closeTaskDialog,
+  deleteTaskByID,
 } = tasksSlice.actions;
 
 export default tasksSlice.reducer;

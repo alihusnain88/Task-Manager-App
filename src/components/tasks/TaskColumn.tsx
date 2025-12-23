@@ -6,7 +6,7 @@ import { type Task } from "../../types";
 import { useDispatch, useSelector } from "react-redux";
 import { moveTask } from "../../store/slices/tasksSlice";
 import { type RootState, type AppDispatch } from "../../store";
-
+import { STATUS_DOTS } from "../../utils/coloredDotsHelper";
 interface Column {
   key: Task["status"];
   title: string;
@@ -19,26 +19,19 @@ interface TaskColumnProps {
   onAddTask: () => void;
 }
 
-export const STATUS_DOTS: Record<Task["status"], string> = {
-  "backlog": "#c94040ff",
-  "in-progress": "#f59e0b",
-  "in-review": "#a855f7",
-  "completed": "#22c55e",
-};
-
-const TaskColumn: React.FC<TaskColumnProps> = ({
+const TaskColumn = ({
   column,
   tasks,
   onTaskClick,
   onAddTask,
-}) => {
+}: TaskColumnProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const activeBoardID = useSelector(
     (state: RootState) => state.boards.activeBoardID
   );
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -90,7 +83,11 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+            <TaskCard
+              key={task.id}
+              task={task}
+              onClick={() => onTaskClick(task)}
+            />
           ))}
         </Box>
 

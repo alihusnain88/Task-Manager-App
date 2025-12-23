@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { useNavigate } from "react-router";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -7,45 +13,44 @@ import {
   Dialog,
   DialogContent,
   Link,
+  IconButton,
 } from "@mui/material";
 import {
   DataGridPremium,
   type GridColDef,
   useGridApiRef,
+  GridDeleteIcon,
 } from "@mui/x-data-grid-premium";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { v4 as uuidv4 } from "uuid";
 
-// Redux Imports
 import type { AppDispatch, RootState } from "../store";
 import { selectAllTasksForGrid } from "../store/selectors/tasksGridSelectors";
-import type { TaskGridRow } from "../types";
+import type { TaskGridRow, Task } from "../types";
+import { fetchBoards, updateBoardName } from "../store/slices/boardsSlice";
 import {
-  fetchBoards,
-  updateBoardName,
-} from "../store/slices/boardsSlice";
-import { fetchTasksByBoard, updateTask } from "../store/slices/tasksSlice";
+  addTask,
+  deleteTaskByID,
+  fetchTasksByBoard,
+  updateTask,
+} from "../store/slices/tasksSlice";
 import {
   setColumnOrder,
   setColumnVisibility,
 } from "../store/slices/gridStateSlice";
-import { type Task } from "../types";
-import { getTagColor } from "../components/tasks/TaskCard";
+import { getTagColor } from "../utils/tagColorsHelper";
 
 const TasksGridView = () => {
   const apiRef = useGridApiRef();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const prevOrderRef = React.useRef<string[]>([]);
+  const prevOrderRef = useRef<string[]>([]);
   const [selectedRowID, setSelectedRowID] = useState<number | null>(null);
-
-  // State for Image Dialog
   const [isOpen, setIsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Redux Selectors
   const rows = useSelector(selectAllTasksForGrid);
   const boards = useSelector((state: RootState) => state.boards.list);
-
-  // Requirement: Persistence Selectors
   const columnOrder = useSelector(
     (state: RootState) => state.gridState.columnOrder
   );
@@ -53,7 +58,13 @@ const TasksGridView = () => {
     (state: RootState) => state.gridState.columnVisibility
   );
 
-  // Requirement: Guard against invalid data objects in Redux (Solves the "Nothing shown" bug)
+  const savedColumnState = JSON.parse(
+    localStorage.getItem("columnOrder") || "{}"
+  );
+  const savedColumnVisibility = JSON.parse(
+    localStorage.getItem("columnVisibility") || "{}"
+  );
+
   const memoizedColumnOrder = useMemo(() => {
     if (
       Array.isArray(columnOrder) &&
@@ -65,59 +76,53 @@ const TasksGridView = () => {
     return undefined;
   }, [columnOrder]);
 
-  // Initial Data Fetching
   useEffect(() => {
     dispatch(fetchBoards());
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
     if (boards.length > 0) {
       boards.forEach((board) => dispatch(fetchTasksByBoard(board)));
     }
-  }, [boards, dispatch]);
-  useEffect(() => {
-    if (!memoizedColumnOrder?.length) return;
-    if (!apiRef.current) return;
+  }, [boards]);
 
-    const current = apiRef.current.getAllColumns().map((c) => c.field);
+  useEffect(() => {
+    if (!memoizedColumnOrder?.length || !apiRef.current) return;
+
+    const currentOrder = apiRef.current.getAllColumns().map((col) => col.field);
 
     const isSame =
-      current.length === memoizedColumnOrder.length &&
-      current.every((f, i) => f === memoizedColumnOrder[i]);
+      currentOrder.length === memoizedColumnOrder.length &&
+      currentOrder.every((field, i) => field === memoizedColumnOrder[i]);
 
     if (!isSame) {
-      apiRef.current.setColumnOrder(memoizedColumnOrder);
+      apiRef.current.setState((state) => ({
+        ...state,
+        columns: {
+          ...state.columns,
+          orderedFields: memoizedColumnOrder,
+        },
+      }));
     }
   }, [memoizedColumnOrder]);
+
   const handleRowClick = (rowID: number) => {
     setSelectedRowID(rowID);
   };
 
-  const savedColumnState = JSON.parse(localStorage.getItem("columnOrder"));
-  const handleOrderChange = () => {
-    const currentState = apiRef?.current?.exportState();
-    const columnState = currentState?.columns;
-    dispatch(setColumnOrder(columnState?.orderedFields)) 
-    localStorage.setItem("columnOrder", JSON.stringify(columnState));
-    console.log(columnState);
-  }; 
-
   const handleProcessRowUpdate = useCallback(
     (newRow: TaskGridRow, oldRow: TaskGridRow) => {
-      if (JSON.stringify(newRow) === JSON.stringify(oldRow)) return oldRow;
+      if (newRow === oldRow) return oldRow;
 
       const updatedTask: Task = {
         id: newRow.taskID,
         title: newRow.taskTitle,
-        status: newRow.status as Task["status"],
+        status: newRow.status,
         tags: newRow.tags || [],
-        background: newRow.background || null,
+        background: newRow.background || null,  
       };
 
-      // Update task in tasksSlice
       dispatch(updateTask({ boardID: newRow.projectID, task: updatedTask }));
-
-      // Update board name in boardsSlice if changed
 
       if (newRow.projectName !== oldRow.projectName) {
         dispatch(
@@ -130,7 +135,7 @@ const TasksGridView = () => {
 
       return newRow;
     },
-    [dispatch, rows]
+    []
   );
 
   const handleImageClick = (img: string) => {
@@ -174,7 +179,7 @@ const TasksGridView = () => {
     {
       field: "taskTitle",
       headerName: "Task",
-      flex: 1.5,
+      flex: 1,
       editable: true,
       hideable: false,
       valueParser: (value: string) => value?.trim(),
@@ -214,13 +219,13 @@ const TasksGridView = () => {
       editable: true,
       type: "singleSelect",
       valueOptions: ["backlog", "in-progress", "in-review", "completed"],
-      valueFormatter: (value: string) => {
-        if (!value) return "";
-        return value
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-      },
+      valueFormatter: (value: string) =>
+        value
+          ? value
+              .split("-")
+              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(" ")
+          : "",
     },
     {
       field: "tags",
@@ -231,7 +236,6 @@ const TasksGridView = () => {
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", py: 1 }}>
           {params.value?.map((tag: string) => {
             const { text, bg } = getTagColor(tag);
-
             return (
               <Typography
                 key={tag}
@@ -240,11 +244,11 @@ const TasksGridView = () => {
                   py: 0.5,
                   bgcolor: bg,
                   color: text,
-                  border: `2px solid${text}`,
+                  border: `2px solid ${text}`,
                   borderRadius: "200px",
                   fontSize: 7,
                   fontWeight: 700,
-                  textTransform: "uppercase",
+                  textTransform: "capitalize",
                   letterSpacing: 0.5,
                 }}
               >
@@ -276,34 +280,75 @@ const TasksGridView = () => {
       renderCell: (params) => {
         if (!params.value) return null;
         return (
-          <Box
-            component="img"
-            src={params.value}
-            alt="task-thumb"
-            onClick={() => handleImageClick(params.value as string)}
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: 1,
-              cursor: "pointer",
-              objectFit: "cover",
-              border: "1px solid",
-              borderColor: "divider",
-            }}
-          />
+          <Box>
+            <Box
+              component="img"
+              src={params.value}
+              alt="task-thumb"
+              onClick={() => handleImageClick(params.value)}
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 1,
+                cursor: "pointer",
+                objectFit: "cover",
+                border: "1px solid",
+                borderColor: "divider",
+              }}
+            />
+          </Box>
         );
       },
     },
+    {
+      field: "delete",
+      headerName: "Delete Row",
+      flex: 0.5,
+      renderCell: (params) => (
+        <GridDeleteIcon
+          style={{ cursor: "pointer" }}
+          onClick={() =>
+            dispatch(
+              deleteTaskByID({
+                boardID: params.row.projectID,
+                taskID: params.row.taskID,
+              })
+            )
+          }
+        />
+      ),
+    },
+    {
+      field: "copy-row",
+      headerName: "Copy Row",
+      flex: 0.5,
+      renderCell: (params) => (
+        <IconButton
+          onClick={() => {
+            const copiedTask: Task = {
+              id: uuidv4(),
+              title: params.row.taskTitle,
+              status: params.row.status,
+              tags: [...params.row.tags],
+              background: params.row.background,
+            };
+            dispatch(
+              addTask({
+                boardID: params.row.projectID,
+                task: copiedTask,
+                nearTaskID: params.row.taskID,
+              })
+            );
+          }}
+        >
+          <ContentCopyIcon />
+        </IconButton>
+      ),
+    },
   ];
-  // const savedOrder = JSON.parse(localStorage.getItem("columnOrder"))
+
   return (
-    <Box
-      sx={{
-        height: "calc(100vh - 100px)",
-        width: "100%",
-        p: 3,
-      }}
-    >
+    <Box sx={{ height: "90vh", width: "100%", p: 3 }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
         Projects & Tasks Grid
       </Typography>
@@ -315,10 +360,25 @@ const TasksGridView = () => {
         disableRowSelectionOnClick
         processRowUpdate={handleProcessRowUpdate}
         showToolbar
-        columnVisibilityModel={columnVisibility}
-        onColumnOrderChange={handleOrderChange}
-        initialState={{
-          columns: savedColumnState,
+        columnVisibilityModel={savedColumnVisibility || columnVisibility}
+        initialState={{ columns: savedColumnState }}
+        onStateChange={(state) => {
+          const newOrder = state.columns?.orderedFields;
+          if (!newOrder || newOrder.length === 0) return;
+
+          const prevOrder = prevOrderRef.current;
+          const hasChanged =
+            prevOrder.length !== newOrder.length ||
+            prevOrder.some((f, i) => f !== newOrder[i]);
+
+          if (hasChanged) {
+            prevOrderRef.current = [...newOrder];
+            dispatch(setColumnOrder(newOrder));
+            localStorage.setItem(
+              "columnOrder",
+              JSON.stringify({ orderedFields: newOrder })
+            );
+          }
         }}
         onColumnVisibilityModelChange={(newModel) => {
           const lockedModel = {
@@ -327,31 +387,12 @@ const TasksGridView = () => {
             taskTitle: true,
           };
           dispatch(setColumnVisibility(lockedModel));
+          localStorage.setItem("columnVisibility", JSON.stringify(lockedModel));
         }}
-        onStateChange={(state) => {
-          const newOrder = state.columns?.orderedFields;
-          if (!newOrder || newOrder.length === 0) return;
-
-          const prevOrder = prevOrderRef.current;
-
-          const hasChanged =
-            prevOrder.length !== newOrder.length ||
-            prevOrder.some((f, i) => f !== newOrder[i]);
-
-          if (hasChanged) {
-            prevOrderRef.current = newOrder;
-            dispatch(setColumnOrder(newOrder));
-          }
-        }}
-        onRowClick={(params) => handleRowClick(params.id as number)}
-        onCellClick={(params, event) => {
-          event.defaultMuiPrevented = true;
-          // alert(event.type);
-        }}
+        onRowClick={(params) => handleRowClick(Number(params.id))}
         getRowClassName={(params) =>
           selectedRowID === params.id ? "selected-row" : ""
         }
-        // onColumnOrderChange={(newOrder)=>handleColumnOrderChange(newOrder)}
         sx={{
           backgroundColor: "background.paper",
           boxShadow: 2,
@@ -363,15 +404,14 @@ const TasksGridView = () => {
             color: "black !important",
           },
           "& .MuiDataGrid-columnHeader": {
-            backgroundColor: "grey.50",
+            backgroundColor: "white",
             color: "black",
           },
           "& .MuiDataGrid-cell:focus-within": { outline: "none" },
         }}
       />
 
-      {/* Requirement: Image Preview Dialog */}
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)} fullWidth>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
         <DialogContent
           sx={{
             p: 0,
@@ -385,10 +425,7 @@ const TasksGridView = () => {
             <img
               src={selectedImage}
               alt="Task Preview"
-              style={{
-                maxWidth: "100%",
-                height: "100%",
-              }}
+              style={{ maxWidth: "100%", height: "100%" }}
             />
           )}
         </DialogContent>

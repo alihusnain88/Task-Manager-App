@@ -1,4 +1,4 @@
-import { Container, Button, useTheme, Box } from "@mui/material";
+import { Button, useTheme, Box } from "@mui/material";
 import React, { useState } from "react";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import BoardsList from "../boards/BoardsList";
@@ -9,10 +9,10 @@ import type { AppDispatch, RootState } from "../../store";
 import { deleteBoard, setActiveBoardID } from "../../store/slices/boardsSlice";
 import { deleteTasksForBoard } from "../../store/slices/tasksSlice";
 
-const Sidebar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const Sidebar = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const boardsList = useSelector((state: RootState) => state.boards.list);
   const activeBoardID = useSelector(
@@ -22,12 +22,14 @@ const Sidebar: React.FC = () => {
   const handleSelect = (id: string) => {
     dispatch(setActiveBoardID(id));
   };
+
   const handleDelete = (id: string) => {
     dispatch(deleteBoard(id));
     dispatch(deleteTasksForBoard(id));
   };
+
   return (
-    <Container
+    <Box
       sx={{
         minHeight: "100%",
         overflowY: "auto",
@@ -40,7 +42,6 @@ const Sidebar: React.FC = () => {
         flexDirection: "column",
         position: "relative",
       }}
-      disableGutters
     >
       <Box sx={{ flex: 1 }}>
         <BoardsList
@@ -61,7 +62,7 @@ const Sidebar: React.FC = () => {
             fontSize: "0.9rem",
             "&:hover": { backgroundColor: theme.palette.action.selected },
           }}
-        > 
+        >
           Add new board
         </Button>
       </Box>
@@ -80,8 +81,13 @@ const Sidebar: React.FC = () => {
         <ThemeToggleButtons />
       </Box>
 
-      <AddBoardDialog isOpen={isOpen} setIsOpen={setIsOpen} />
-    </Container>
+      <AddBoardDialog
+        isOpen={isOpen}
+        setIsOpen={(open) => {
+          if (!open) setIsOpen(false);
+        }}
+      />
+    </Box>
   );
 };
 

@@ -1,23 +1,14 @@
 import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { type Task } from "../../types";
+import { getTagColor } from "../../utils/tagColorsHelper";
 
 interface TaskCardProps {
   task: Task;
   onClick: () => void;
 }
 
-export const getTagColor = (tag: string) => {
-  const t = tag.toLowerCase();
-  if (t.includes("technical") || t.includes("react"))
-    return { bg: "#dbeafe", text: "#1e40af" };
-  if (t.includes("design") || t.includes("concept"))
-    return { bg: "#fce7f3", text: "#9d174d" };
-  if (t.includes("front")) return { bg: "#dcfce7", text: "#09913dff" };
-  return { bg: "#e2e8f0", text: "#485e7dff" };
-};
-
-const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
+const TaskCard = ({ task, onClick }: TaskCardProps) => {
   const theme = useTheme();
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -41,7 +32,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
         mb: 1,
         boxShadow: theme.shadows[1],
         "&:hover": {
-          boxShadow: theme.shadows[2]
+          boxShadow: theme.shadows[2],
         },
       }}
     >
@@ -71,7 +62,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
                 px: 1,
                 py: 0.25,
                 bgcolor: style.bg,
-                color: style.text, 
+                color: style.text,
                 borderRadius: "6px",
                 fontSize: 6,
                 fontWeight: 700,
