@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Container, Typography, useTheme } from "@mui/material";
 import Sidebar from "./components/layout/Sidebar";
 import MainPanel from "./components/layout/MainPanel";
 import { useSelector, useDispatch } from "react-redux";
@@ -90,7 +90,6 @@ const App = () => {
           }}
         >
           <Sidebar />
-
           <MainPanel tasks={tasks} onAddTask={handleAddTask} />
         </Box>
       </Box>

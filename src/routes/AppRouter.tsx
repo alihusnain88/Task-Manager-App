@@ -10,7 +10,7 @@ const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<TasksGridView />} />
+        <Route path="/" element={<App />} />
         <Route path="/projects/:projectID" element={<ProjectView />} />
         <Route path="/tasks/:taskID" element={<TaskView />} />
       </Routes>
