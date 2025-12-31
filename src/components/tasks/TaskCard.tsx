@@ -1,72 +1,26 @@
+import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
+import { type Task } from "../../types";
 import { getTagColor } from "../../utils/tagColorsHelper";
-import type { Task, TaskStatus } from "../../types";
 
 interface TaskCardProps {
-  activeBoardID: number | null;
   task: Task;
-  index: number;
-  onReorder: (params: {
-    boardID: number;
-    fromStatus: TaskStatus;
-    toStatus: TaskStatus;
-    fromIndex: number;
-    toIndex: number;
-  }) => void;
-  onMoveTask: (taskID: number, newStatus: TaskStatus, toIndex: number) => void;
-  setIsOpen: (open: boolean) => void;
-  editingTask: Task | null;
-  setEditingTask: (task: Task | null) => void;
-  isEditing: boolean;
-  setIsEditing: (editing: boolean) => void;
+  onClick: () => void;
 }
 
-const TaskCard = ({ activeBoardID, task, index, onReorder, onMoveTask, setIsOpen, setEditingTask, setIsEditing}: TaskCardProps) => {
+const TaskCard = ({ task, onClick }: TaskCardProps) => {
   const theme = useTheme();
 
-  const handleDragStart = (e) => {
-    e.dataTransfer.setData(
-      "application/json",
-      JSON.stringify({
-        boardID: activeBoardID,
-        taskID: task.taskID,
-        fromStatus: task.status,
-        fromIndex: index,
-      })
-    );
-  };
-
-  const handleDragOver = (e) => e.preventDefault();
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const data = JSON.parse(e.dataTransfer.getData("application/json"));
-
-    if (data.fromStatus === task.status) {
-      onReorder({
-        boardID: data.boardID,
-        fromStatus: data.fromStatus,
-        toStatus: task.status,
-        fromIndex: data.fromIndex,
-        toIndex: index,
-      });
-    } else {
-      onMoveTask(data.taskID, task.status, index);
-    }
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.setData("taskID", task.id);
+    e.dataTransfer.setData("taskStatus", task.status);
   };
 
   return (
     <Box
       draggable
       onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onClick={()=>{
-        setIsOpen(true)
-        setIsEditing(true)
-        setEditingTask(task)
-      }}
+      onClick={onClick}
       sx={{
         p: 1,
         borderRadius: 0.5,
@@ -77,7 +31,9 @@ const TaskCard = ({ activeBoardID, task, index, onReorder, onMoveTask, setIsOpen
         gap: 1,
         mb: 1,
         boxShadow: theme.shadows[1],
-        "&:hover": { boxShadow: theme.shadows[2] },
+        "&:hover": {
+          boxShadow: theme.shadows[2],
+        },
       }}
     >
       {task.background && (
@@ -89,15 +45,11 @@ const TaskCard = ({ activeBoardID, task, index, onReorder, onMoveTask, setIsOpen
             backgroundImage: `url(${task.background})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
+            mb: 0,
           }}
         />
       )}
-      <Typography
-        fontWeight={200}
-        fontSize={10}
-        lineHeight={1.4}
-        sx={{ color: theme.palette.text.primary }}
-      >
+      <Typography fontWeight={200} fontSize={10} lineHeight={1.4}>
         {task.title}
       </Typography>
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
@@ -115,6 +67,7 @@ const TaskCard = ({ activeBoardID, task, index, onReorder, onMoveTask, setIsOpen
                 fontSize: 6,
                 fontWeight: 700,
                 textTransform: "capitalize",
+                letterSpacing: 0.5,
               }}
             >
               {tag}

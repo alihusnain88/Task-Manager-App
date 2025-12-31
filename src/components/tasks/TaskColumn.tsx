@@ -1,71 +1,62 @@
-import { Box, Typography, Button, Container } from "@mui/material";
+import React from "react";
+import { Box, Typography, Button } from "@mui/material";
 import TaskCard from "./TaskCard";
 import AddIcon from "@mui/icons-material/Add";
+import { type Task } from "../../types";
+import { useDispatch, useSelector } from "react-redux";
+import { moveTask } from "../../store/slices/tasksSlice";
+import { type RootState, type AppDispatch } from "../../store";
 import { STATUS_DOTS } from "../../utils/coloredDotsHelper";
-import type { Column, Task, TaskStatus } from "../../types";
+interface Column {
+  key: Task["status"];
+  title: string;
+}
 
 interface TaskColumnProps {
-  activeBoardID: number;
   column: Column;
   tasks: Task[];
-  onOpen: () => void;
-  onMoveTask: (taskID: number, newStatus: TaskStatus, toIndex: number) => void;
-  onReorderTask: ({
-    boardID,
-    fromStatus,
-    toStatus,
-    fromIndex,
-    toIndex,
-  }: {
-    boardID: number;
-    fromStatus: TaskStatus;
-    toStatus: TaskStatus;
-    fromIndex: number;
-    toIndex: number;
-  }) => void;
-  setIsOpen: (isOpen: boolean) => void;
-  editingTask: Task | null;
-  setEditingTask: (task: Task | null) => void;
-  isEditing: boolean;
-  setIsEditing: (isEditing: boolean) => void;
+  onTaskClick: (task: Task) => void;
+  onAddTask: () => void;
 }
 
 const TaskColumn = ({
-  activeBoardID,
   column,
   tasks,
-  onOpen,
-  onMoveTask,
-  onReorderTask,
-  setIsOpen,
-  editingTask,
-  setEditingTask,
-  isEditing,
-  setIsEditing,
+  onTaskClick,
+  onAddTask,
 }: TaskColumnProps) => {
-  const sortedTasks = [...tasks].sort((a, b) => a.priority - b.priority);
-  const handleDragOver = (e) => e.preventDefault();
+  const dispatch = useDispatch<AppDispatch>();
+  const activeBoardID = useSelector(
+    (state: RootState) => state.boards.activeBoardID
+  );
 
-  const handleDrop = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const rawData = e.dataTransfer.getData("application/json");
-    if (!rawData) return;
+  };
 
-    const data = JSON.parse(rawData);
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!activeBoardID) return;
 
-    const taskID = Number(data.taskID);
+    const taskID = e.dataTransfer.getData("taskID");
+    const oldStatus = e.dataTransfer.getData("taskStatus") as Task["status"];
 
-    if (data.fromStatus !== column.key) {
-      onMoveTask(taskID, column.key, sortedTasks?.length || 0);
+    if (taskID && oldStatus !== column.key) {
+      dispatch(
+        moveTask({
+          boardID: activeBoardID,
+          taskID,
+          newStatus: column.key,
+        })
+      );
     }
   };
 
   return (
-    <Container
-      disableGutters
+    <div
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      sx={{ minWidth: "25%", minHeight: "100%" }}
+      style={{ minWidth: "25%" }}
     >
       <Box sx={{ flex: 1, p: 0, minHeight: "100%" }}>
         <Box
@@ -85,26 +76,17 @@ const TaskColumn = ({
               bgcolor: STATUS_DOTS[column.key],
             }}
           />
-          <Typography
-            fontWeight={400}
-            fontSize={12}
-          >{`${column.title} (${tasks?.length})`}</Typography>
+          <Typography fontWeight={400} fontSize={12}>
+            {`${column.title} (${tasks.length})`}
+          </Typography>
         </Box>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-          {sortedTasks?.map((task, index) => (
+          {tasks.map((task) => (
             <TaskCard
-              key={task.taskID}
-              activeBoardID={activeBoardID}
+              key={task.id}
               task={task}
-              index={index}
-              onReorder={onReorderTask}
-              onMoveTask={onMoveTask}
-              setIsOpen={setIsOpen}
-              editingTask={editingTask}
-              setEditingTask={setEditingTask}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
+              onClick={() => onTaskClick(task)}
             />
           ))}
         </Box>
@@ -112,25 +94,30 @@ const TaskColumn = ({
         {column.key === "backlog" && (
           <Button
             variant="contained"
-            onClick={onOpen}
+            onClick={onAddTask}
             endIcon={<AddIcon />}
             sx={{
               mt: 1,
               gap: 2,
               height: "30px",
+              maxWidth: "100%",
               width: "100%",
               borderRadius: "10px",
               fontSize: "0.7rem",
               backgroundColor: "rgb(195 218 250)",
               color: "rgb(51 86 211)",
-              "&:hover": { backgroundColor: "rgb(199 222 254)" },
+              "&:hover": {
+                backgroundColor: "gray",
+                color: "white",
+                transition: "none",
+              },
             }}
           >
             Add new task card
           </Button>
         )}
       </Box>
-    </Container>
+    </div>
   );
 };
 

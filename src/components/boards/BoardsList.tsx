@@ -1,42 +1,38 @@
 import React from "react";
-import { Box, Container, Typography } from "@mui/material";
+import { Container, Typography } from "@mui/material";
 import BoardItem from "./BoardItem";
 import type { Board } from "../../types";
 
 interface BoardsListProps {
-  boards: Board[];
-  activeBoardID: number | null;
-  setActiveBoardID: (id: number) => void;
-    setIsDeleteDialogOpen: (isOpen: boolean) => void;
-    setBoardToDeleteID: (id: number) => void;
-
+  boardsList: Board[];
+  activeBoardID: string | null;
+  onSelect: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 const BoardsList = ({
-  boards,
+  boardsList,
   activeBoardID,
-  setActiveBoardID,
-  setIsDeleteDialogOpen,
-  setBoardToDeleteID
+  onSelect,
+  onDelete,
 }: BoardsListProps) => {
   return (
-    <Box>
-      {boards.length === 0 ? (
+    <Container disableGutters>
+      {boardsList.length === 0 ? (
         <Typography variant="body2" sx={{ p: 2, textAlign: "center" }}>
           No boards found.
         </Typography>
       ) : (
-        boards?.map((board) => (
+        boardsList.map((board) => (
           <BoardItem
             key={board.id}
             board={board}
             isActive={board.id === activeBoardID}
-            onSelect={() => setActiveBoardID(board.id)}
-            setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-            setBoardToDeleteID={setBoardToDeleteID}
+            onSelect={() => onSelect(board.id)}
+            onDelete={() => onDelete(board.id)}
           />
         ))
       )}
-    </Box>
+    </Container>
   );
 };
 
