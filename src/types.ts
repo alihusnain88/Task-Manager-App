@@ -1,40 +1,35 @@
 export type TaskStatus = "backlog" | "in-progress" | "in-review" | "completed";
 
 export interface Task {
-  id: string;
+  boardID: number;
+  taskID: number;
   title: string;
   status: TaskStatus;
   tags: string[] | [];
   background: string | null;
+  priority: number;
 }
 
 export interface Board {
-  id: string;
+  id: number;
   name: string;
-  emoji: string;
-  link?: string;
-  tasks?: Task[];
+  logo: string;
 }
 
-export type UseBoardsListResult = {
-  boards: Board[];
-  loading: boolean;
-  error: string | null;
-};
-
-export type UseBoardDataResult = {
-  boardData: { tasks: Task[] } | null;
-  loading: boolean;
-  error: string | null;
-};
 
 export interface TaskGridRow {
-  id: string;
-  taskID: string;
+  id: number;
+  boardID: number;
+  boardName: string;
+  taskID: number;
   taskTitle: string;
-  projectID: string;
-  projectName: string;
   status: TaskStatus;
   tags?: string[] | null;
   background?: string | null;
+}
+
+
+export interface Column {
+  key: "backlog" | "in-progress" | "in-review" | "completed";
+  title: "Backlogs" | "In Progress" | "In Review" | "Completed";
 }
