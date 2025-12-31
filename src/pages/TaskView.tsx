@@ -1,27 +1,23 @@
-import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import type { RootState } from "../store";
-import { Container, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
+import type { Task } from "../types";
 
-const TaskView: React.FC = () => {
-  const { taskID } = useParams<{ taskID: string }>();
-  const allTasksByBoard = useSelector((state: RootState) => state.tasks.byBoardID);
-
-  const task = Object.values(allTasksByBoard)
-    .flat()
-    .find((t) => String(t.id) === String(taskID));
+const TaskView= ({allTasks}: {allTasks: Task[]}) => {
+  const { taskID } = useParams();
+  const task = allTasks.find((task) => task.taskID===Number(taskID)) 
 
   if (!task) return <Typography>Task not found</Typography>;
 
   return (
     <Container sx={{m: 4}}>
       <Typography variant="h4" sx={{marginBottom: 2}}>Task: {task.title}</Typography>
-      <Typography variant="h5">Status: {task.status
-          .split("-")
+      <Typography variant="h5">Status: {task.status?.split("-")
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" ")}</Typography>
       <Typography variant="h5">Tags: {task.tags?.join(", ")}</Typography>
+      {/* <Box height='200px' width='400px' sx={{backgroundColor: 'red'}}> */}
       {task.background && <img src={task.background} alt="task" style={{ maxWidth: 600, marginTop: 26}} />}
+      {/* </Box> */}
     </Container>
   );
 };

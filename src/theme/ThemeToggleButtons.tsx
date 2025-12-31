@@ -41,7 +41,7 @@ const ThemeToggleButtons = () => {
               ? activeStyle.hoverBg || activeStyle.bgcolor
               : inactiveStyle.hoverBg,
           },
-        }}
+        }} 
       >
         Dark
       </Button>
