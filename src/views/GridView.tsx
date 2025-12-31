@@ -39,7 +39,7 @@ const GridView = ({
 }: GridViewProps) => {
   const theme = useTheme();
   const notify = () => toast("Row Copied!");
-  const rowss = allTasks.map((task, index) => {
+  const rows = allTasks.map((task, index) => {
     return {
       id: index + 1,
       boardID: task?.boardID,
@@ -103,7 +103,7 @@ const GridView = ({
   const handleRemoveImage = () => {
     if (selectedRowID === null) return;
 
-    const targetRow = rowss.find((r) => r.id === selectedRowID);
+    const targetRow = rows.find((r) => r.id === selectedRowID);
 
     if (targetRow) {
       setAllTasks((prev) =>
@@ -138,7 +138,7 @@ const GridView = ({
       reader.onload = (ev) => {
         const newImageUrl = ev.target?.result as string;
 
-        const targetRow = rowss.find((r) => r.id === selectedRowID);
+        const targetRow = rows.find((r) => r.id === selectedRowID);
         if (targetRow) {
           setAllTasks((prev) =>
             prev.map((task) =>
@@ -166,7 +166,7 @@ const GridView = ({
   };
 
   const handleCopyRow = (rowID: number) => {
-    const rowToCopy = rowss.find((row) => row.id === rowID);
+    const rowToCopy = rows.find((row) => row.id === rowID);
 
     const originalTask = allTasks.find((t) => t.taskID === rowToCopy?.taskID);
     const copiedTask = {
@@ -459,6 +459,7 @@ const GridView = ({
             justifyContent: "center",
             alignItems: "center",
             height: "100%",
+            color: theme.palette.text.primary
           }}
           onClick={() => {
             setTaskToDeleteID(params.row.taskID);
@@ -484,6 +485,7 @@ const GridView = ({
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
+            color: theme.palette.text.primary
           }}
           onClick={() => handleCopyRow(params.row.id)}
         >
@@ -522,8 +524,8 @@ const GridView = ({
         onClick={onToggleView}
         sx={{
           position: "fixed",
-          left: 15,
-          top: 20,
+          left: 10,
+          top: 15,
           p: 1.2,
           borderRadius: "8px",
           color: "white",
@@ -531,7 +533,7 @@ const GridView = ({
           "&:hover": { backgroundColor: "#bc2222ff" },
         }}
       >
-        Panel View
+        Panel View 
       </Button>
          
       <Typography
@@ -543,7 +545,7 @@ const GridView = ({
       </Typography>
          
       <DataGridPremium
-        rows={rowss}
+        rows={rows}
         columns={columns}
         disableRowSelectionOnClick
         processRowUpdate={handleProcessRowUpdate}

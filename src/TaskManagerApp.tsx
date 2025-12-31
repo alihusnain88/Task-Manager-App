@@ -5,7 +5,7 @@ import PanelView from "./views/PanelView";
 import { BrowserRouter, Route, Routes } from "react-router";
 import ProjectView from "./pages/ProjectView";
 import TaskView from "./pages/TaskView";
-import type { Board, Task, TaskStatus } from "./types";
+import type { Board, Task, TaskStatus } from "./types"; 
 
 const TaskManagerApp = () => {
   const [boards, setBoards] = useState<Board[] | []>((data.boards || []) as Board[]);
@@ -20,7 +20,7 @@ const TaskManagerApp = () => {
   setAllTasks(prev => [...prev, newTask]); 
 }; 
 
-  const handleEditTask = (updatedTask: Task) => {
+  const handleEditTask = (updatedTask: Task) => { 
   setAllTasks((prevTasks) => 
     prevTasks.map((task) => 
       task.taskID === updatedTask.taskID && task.boardID === updatedTask.boardID ? { ...task, ...updatedTask } : task

@@ -72,7 +72,7 @@ const AddImageDialog = ({
           variant="outlined"
           color="error"
           onClick={onRemoveImage}
-          sx={{ textTransform: "none" }}
+          sx={{ textTransform: "none", border: 'none'}}
         >
           Remove Image
         </Button>
@@ -80,7 +80,7 @@ const AddImageDialog = ({
         <Button
           variant="contained"
           onClick={onChangeImage}
-          sx={{ textTransform: "none" }}
+          sx={{ textTransform: "none", border: 'none'}}
         >
           Change Image
         </Button>

@@ -47,7 +47,7 @@ const PanelView = ({
         backgroundRepeat: "no-repeat",
       }}
     >
-      <Button
+      <Button 
         onClick={onToggleView}
         sx={{
           position: "fixed",
