@@ -1,6 +1,7 @@
-import { createSelector } from "@reduxjs/toolkit";
-import type { RootState } from "..";
-import { type TaskGridRow } from "../../types";
+import { createSelector } from "@reduxjs/toolkit"
+import type { RootState } from ".."
+import {type TaskGridRow} from '../../types'
+
 
 export const selectAllTasksForGrid = createSelector(
   [
@@ -8,7 +9,7 @@ export const selectAllTasksForGrid = createSelector(
     (state: RootState) => state.tasks.byBoardID,
   ],
   (boards, tasksByBoard): TaskGridRow[] => {
-    const rows: TaskGridRow[] = [];
+    const rows: TaskGridRow[] = [];    
 
     boards.forEach((board) => {
       const tasks = tasksByBoard[board.id] ?? [];

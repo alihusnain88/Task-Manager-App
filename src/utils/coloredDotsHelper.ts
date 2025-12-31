@@ -1,6 +1,6 @@
 import type { Task } from "../types";
 
-export const STATUS_DOTS = {
+export const STATUS_DOTS: Record<Task["status"], string> = {
   "backlog": "#c94040ff",
   "in-progress": "#f59e0b",
   "in-review": "#a855f7",

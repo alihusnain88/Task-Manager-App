@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,15 +13,12 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+import { useDispatch } from "react-redux";
+import { type AppDispatch } from "../../store";
+import { addBoard } from "../../store/slices/boardsSlice";
+import { v4 as uuidv4 } from "uuid";
+import { type Board } from "../../types";
 import { getLogoBackground } from "../../utils/logoBackgroundHelper";
-import type { Board } from "../../types";
-
-interface AddBoardDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  boards: Board[];
-  onAddBoard: (board: Board) => void;
-}
 const BOARD_LOGOS = [
   "🛠️",
   "⚙️",
@@ -39,15 +36,17 @@ const BOARD_LOGOS = [
   "📁",
 ];
 
-const AddBoardDialog = ({
-  isOpen,
-  onClose,
-  boards,
-  onAddBoard,
-}: AddBoardDialogProps) => {
+interface AddBoardDialogProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+const AddBoardDialog = ({ isOpen, setIsOpen }: AddBoardDialogProps) => {
   const theme = useTheme();
+  const dispatch = useDispatch<AppDispatch>();
+
   const [name, setName] = useState<string>("");
-  const [logo, setlogo] = useState<string>(BOARD_LOGOS[0]);
+  const [emoji, setEmoji] = useState<string>(BOARD_LOGOS[0]);
   const [error, setError] = useState<string>("");
 
   const handleSave = () => {
@@ -55,30 +54,34 @@ const AddBoardDialog = ({
       setError("Board name required");
       return;
     }
-    if (boards.some((board) => board.name === name)) {
-      setError("Duplicate Boards");
-      return;
-    }
 
-    const newBoard = {
-      id: boards[boards?.length - 1]?.id + 1 || 0,
+    const newBoard: Board = {
+      id: uuidv4(),
       name,
-      logo,
-      color: getLogoBackground(),
+      emoji,
+      tasks: [
+        {
+          id: uuidv4(),
+          title: "Add your backlogs here",
+          status: "backlog",
+          tags: [],
+          background: "",
+        },
+      ],
     };
 
-    onAddBoard(newBoard);
+    dispatch(addBoard(newBoard));
 
-    onClose();
+    setIsOpen(false);
     setName("");
-    setlogo(BOARD_LOGOS[0]);
+    setEmoji(BOARD_LOGOS[0]);
     setError("");
   };
 
   return (
     <Dialog
       open={isOpen}
-      onClose={onClose}
+      onClose={() => setIsOpen(false)}
       fullWidth
       maxWidth="sm"
       slotProps={{
@@ -111,7 +114,7 @@ const AddBoardDialog = ({
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: theme.palette.background.default,
         }}
       >
         <DialogTitle
@@ -124,10 +127,8 @@ const AddBoardDialog = ({
             color: "#cecacaff",
           }}
         >
-          <Typography fontSize="0.9rem" color={theme.palette.text.primary}>
-            New Board
-          </Typography>
-          <IconButton onClick={onClose} size="small">
+          <Typography fontSize="0.9rem">New Board</Typography>
+          <IconButton onClick={() => setIsOpen(false)} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -144,7 +145,7 @@ const AddBoardDialog = ({
           }}
         >
           <Box>
-            <Typography fontSize="0.7rem" gutterBottom>
+            <Typography fontSize="0.7rem" color="#9d9d9d" gutterBottom>
               Board Name
             </Typography>
             <TextField
@@ -159,25 +160,21 @@ const AddBoardDialog = ({
                 if (error) setError("");
               }}
               sx={{
-                "& .MuiInputBase-root": {
-                  height: 25,
-                  borderRadius: "10px",
-                  border: `1px solid ${theme.palette.text.primary}`,
-                },
+                "& .MuiInputBase-root": { height: 25, borderRadius: "10px" },
                 "& input": { padding: "0 14px" },
               }}
             />
           </Box>
 
           <Box>
-            <Typography fontSize="0.7rem" gutterBottom>
+            <Typography fontSize="0.7rem" color="#9d9d9d" gutterBottom>
               Logo
             </Typography>
             <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-              {BOARD_LOGOS.map((currLogo) => (
+              {BOARD_LOGOS.map((em) => (
                 <Box
-                  key={currLogo}
-                  onClick={() => setlogo(currLogo)}
+                  key={em}
+                  onClick={() => setEmoji(em)}
                   sx={{
                     width: 24,
                     height: 24,
@@ -189,12 +186,12 @@ const AddBoardDialog = ({
                     cursor: "pointer",
                     fontSize: 14,
                     border:
-                      logo === currLogo
+                      emoji === em
                         ? `3px solid ${theme.palette.primary.main}`
                         : "",
                   }}
                 >
-                  {currLogo}
+                  {em}
                 </Box>
               ))}
             </Box>
@@ -215,24 +212,15 @@ const AddBoardDialog = ({
             endIcon={<CheckIcon />}
             onClick={handleSave}
             size="small"
-            sx={{
-              fontSize: "0.7rem",
-              textTransform: "none",
-              backgroundColor:
-                theme.components?.MuiButton?.styleOverrides?.root?.backgroudColor,
-            }}
+            sx={{ fontSize: "0.7rem", textTransform: "none" }}
           >
             Create Board
           </Button>
           <Button
             variant="outlined"
             size="small"
-            onClick={onClose}
-            sx={{
-              border: "1.5px solid #696969",
-              fontSize: "0.7rem",
-              background: "none",
-            }}
+            onClick={() => setIsOpen(false)}
+            sx={{ background: "none" }}
           >
             Cancel
           </Button>

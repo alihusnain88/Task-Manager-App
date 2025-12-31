@@ -7,13 +7,6 @@ import { toggleMode } from "../store/slices/themeSlice";
 export const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
 
 export default function AppThemeProvider({ children }: { children: React.ReactNode }) {
-  // const [mode, setMode] = useState<"dark" | "light">("dark")
-
-  // const toggleMode = () => {
-  //   mode === "dark" ? setMode("light") : setMode("dark")
-  // }
-
-  
   const mode = useSelector((state: RootState) => state.theme.mode); 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -38,7 +31,7 @@ export default function AppThemeProvider({ children }: { children: React.ReactNo
               }
             : {
                 primary: { main: "#2563eb" },
-                background: { default: "#d2d2d3ff", paper: "#ffffff" },
+                background: { default: "#eaecefff", paper: "#ffffff" },
                 text: { primary: "#2a2d32", secondary: "#4b5563" },
               }),
         },
@@ -69,7 +62,7 @@ export default function AppThemeProvider({ children }: { children: React.ReactNo
           toggleButton: {
             active: {
               dark: { bgcolor: "#1a1b1f", color: "#ffffff", hoverBg: "#1a1b1f" },
-              light: { bgcolor: "#909090ff", color: "#000000", hoverBg: "#d6d6d6" },
+              light: { bgcolor: "#e0e0e0", color: "#000000", hoverBg: "#d6d6d6" },
             },
             inactive: {
               dark: { bgcolor: "transparent", color: "#ffffff", hoverBg: "rgba(26,27,31,0.08)" },
@@ -99,7 +92,7 @@ export default function AppThemeProvider({ children }: { children: React.ReactNo
               root: {
                 borderRadius: 50,
                 boxShadow: "none",
-                backgroundColor: mode === "dark" ? "#3762e3" : "rgb(195 218 250)",
+                backgroundColor: mode === "dark" ? "#2563eb" : "rgb(195 218 250)",
                 color: mode === "dark" ? "#ffffff" : "inherit",
                 "&:hover": {
                   boxShadow: "none",

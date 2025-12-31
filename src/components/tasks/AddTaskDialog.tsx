@@ -15,21 +15,18 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import { type Task, type TaskStatus } from "../../types";
+import { v4 as uuidv4 } from "uuid";
 import { useTheme } from "@mui/material";
+import { useSelector, useDispatch } from "react-redux";
+import { type RootState, type AppDispatch } from "../../store";
+import { addTask, updateTask } from "../../store/slices/tasksSlice";
 import { STATUS_DOTS } from "../../utils/coloredDotsHelper";
+import { Link } from "react-router";
 import { getTagColor } from "../../utils/tagColorsHelper";
-
 interface AddTaskDialogProps {
   isOpen: boolean;
-  onClose: () => void;
-  totalTasksForBoard: number;
-  activeBoardID: number | null;
-  onAddTask: (task: Task) => void;
-  isEditing: boolean;
-  editingTask: Task | null;
-  onEditTask: (task: Task) => void;
-  setIsEditing: (isEditing: boolean) => void;
-  setEditingTask: (task: Task | null) => void;
+  setIsOpen: (open: boolean) => void;
+  task?: Task | null;
 }
 
 const STATUS_OPTIONS: { key: TaskStatus; label: string }[] = [
@@ -39,19 +36,12 @@ const STATUS_OPTIONS: { key: TaskStatus; label: string }[] = [
   { key: "completed", label: "Completed" },
 ];
 
-const AddTaskDialog = ({
-  isOpen,
-  onClose,
-  totalTasksForBoard,
-  activeBoardID,
-  onAddTask,
-  isEditing,
-  editingTask,
-  onEditTask,
-  setIsEditing,
-  setEditingTask,
-}: AddTaskDialogProps) => {
+const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
   const theme = useTheme();
+  const dispatch = useDispatch<AppDispatch>();
+  const activeBoardID = useSelector(
+    (state: RootState) => state.boards.activeBoardID
+  );
 
   const [title, setTitle] = useState<string>("");
   const [status, setStatus] = useState<TaskStatus>("backlog");
@@ -61,19 +51,22 @@ const AddTaskDialog = ({
   const [background, setBackground] = useState<string | null>(null);
 
   useEffect(() => {
-    if(!isOpen) return;
-    if (isEditing && editingTask !== null && editingTask.boardID === activeBoardID) {
-      setTitle(editingTask.title || "");
-      setStatus(editingTask.status || "backlog");
-      setTags(editingTask.tags || []);
-      setBackground(editingTask.background || null);
-    } else {
-      setTitle("");
-      setStatus("backlog");
-      setTags([]);
-      setBackground(null);
+    if (isOpen) {
+      if (task) {
+        setTitle(task.title ?? "");
+        setStatus(task.status ?? "backlog");
+        setTags(task.tags ?? []);
+        setBackground(task.background ?? null);
+      } else {
+        setTitle("");
+        setStatus("backlog");
+        setTags([]);
+        setBackground(null);
+      }
+      setTagInput("");
+      setError("");
     }
-  }, [isOpen, isEditing, editingTask, activeBoardID]);
+  }, [task, isOpen]);
 
   const handleAddTag = () => {
     const newTag = tagInput.trim();
@@ -83,40 +76,34 @@ const AddTaskDialog = ({
   };
 
   const handleSave = () => {
-  if (!title.trim()) {
-    setError("Name required");
-    return;
-  }
-  if (activeBoardID === null) return;
+    if (!title.trim()) {
+      setError("Name required");
+      return;
+    }
+    if (!activeBoardID) return;
 
-  if (editingTask) {
-    onEditTask({
-      ...editingTask,
+    const newTask: Task = {
+      id: task?.id ?? uuidv4(),
       title,
       status,
       tags,
       background,
-    });
-  } else {
-    onAddTask({
-      taskID: totalTasksForBoard + 1,
-      boardID: activeBoardID,
-      title,
-      status,
-      tags,
-      background,
-      priority: totalTasksForBoard + 1,
-    });
-  }
-  handleCloseDialog();
+    };
 
-};
-const handleCloseDialog = () => {
-  setIsEditing(false);
-  setEditingTask(null);
-  onClose();
-};
+    if (task) {
+      dispatch(updateTask({ boardID: activeBoardID, task: newTask }));
+    } else {
+      dispatch(addTask({ boardID: activeBoardID, task: newTask }));
+    }
 
+    setTitle("");
+    setStatus("backlog");
+    setTags([]);
+    setTagInput("");
+    setBackground(null);
+    setError("");
+    setIsOpen(false);
+  };
 
   const inputSx = {
     "& .MuiInputBase-root": { height: 22, borderRadius: "6px" },
@@ -131,7 +118,7 @@ const handleCloseDialog = () => {
   return (
     <Dialog
       open={isOpen}
-      onClose={handleCloseDialog}
+      onClose={() => setIsOpen(false)}
       maxWidth={false}
       slotProps={{
         backdrop: {
@@ -160,12 +147,12 @@ const handleCloseDialog = () => {
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          background: theme.palette.background.paper,
+          background: theme.palette.background.default,
         }}
       >
         <DialogTitle
           sx={{
-            color: theme.palette.text.primary,
+            color: "#cecaca",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -176,7 +163,19 @@ const handleCloseDialog = () => {
           }}
         >
           Task Details
-          <IconButton onClick={handleCloseDialog} size="small">
+          <Link to={`tasks/${task?.id}`}>
+            <Typography
+              sx={{
+                textAlign: "center",
+                color: "#fff",
+                textDecoration: "underline",
+                fontSize: 14,
+              }}
+            >
+              Open
+            </Typography>
+          </Link>
+          <IconButton onClick={() => setIsOpen(false)} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -196,9 +195,7 @@ const handleCloseDialog = () => {
             sx={{
               width: "100%",
               height: 50,
-              border: !background
-                ? `1px dashed ${theme.palette.text.primary}`
-                : "none",
+              border: !background ? "1px dashed #9d9d9d" : "none",
               borderRadius: "4px",
               display: "flex",
               justifyContent: "center",
@@ -212,9 +209,7 @@ const handleCloseDialog = () => {
             onClick={() => document.getElementById("task-image-input")?.click()}
           >
             {!background && (
-              <Typography
-                sx={{ fontSize: "0.65rem", color: theme.palette.text.primary }}
-              >
+              <Typography sx={{ fontSize: "0.65rem", color: "#9d9d9d" }}>
                 Click to upload
               </Typography>
             )}
@@ -259,7 +254,7 @@ const handleCloseDialog = () => {
             <Typography
               fontSize="0.5rem"
               gutterBottom
-              sx={{ color: theme.palette.text.primary }}
+              sx={{ color: "#9d9d9d" }}
             >
               Task Name
             </Typography>
@@ -281,7 +276,7 @@ const handleCloseDialog = () => {
             <Typography
               fontSize="0.5rem"
               gutterBottom
-              sx={{ color: theme.palette.text.primary }}
+              sx={{ color: "#9d9d9d" }}
             >
               Status
             </Typography>
@@ -296,6 +291,7 @@ const handleCloseDialog = () => {
                 renderValue: (selected) => {
                   const option = STATUS_OPTIONS.find((s) => s.key === selected);
                   const dotColor = STATUS_DOTS[selected as TaskStatus];
+
                   return (
                     <Box
                       sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
@@ -312,7 +308,7 @@ const handleCloseDialog = () => {
                         sx={{
                           fontSize: "0.75rem",
                           fontWeight: 500,
-                          color: theme.palette.text.primary,
+                          color: "#fff",
                         }}
                       >
                         {option?.label}
@@ -327,6 +323,12 @@ const handleCloseDialog = () => {
                   paddingRight: "8px !important",
                   display: "flex",
                   alignItems: "center",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#2d2d2d",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#404040",
                 },
               }}
             >
@@ -359,7 +361,7 @@ const handleCloseDialog = () => {
             <Typography
               fontSize="0.5rem"
               gutterBottom
-              sx={{ color: theme.palette.text.primary }}
+              sx={{ color: "#9d9d9d" }}
             >
               Tags
             </Typography>
@@ -410,18 +412,14 @@ const handleCloseDialog = () => {
             endIcon={<CheckIcon />}
             onClick={handleSave}
             size="small"
-            sx={{
-              fontSize: "0.7rem",
-              color: theme.palette.text.primary,
-              borderRadius: "20px",
-            }}
+            sx={{ fontSize: "0.7rem", color: "#ebe9e9", borderRadius: "20px" }}
           >
             Save
           </Button>
           <Button
             variant="outlined"
             size="small"
-            onClick={handleCloseDialog}
+            onClick={() => setIsOpen(false)}
             sx={{
               border: "1.5px solid #696969",
               fontSize: "0.7rem",

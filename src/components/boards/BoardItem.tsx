@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Typography,
   IconButton,
@@ -6,32 +7,24 @@ import {
   useTheme,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { type Board } from "../../types";
 import { getLogoBackground } from "../../utils/logoBackgroundHelper";
-import type { Board } from "../../types";
 
 interface BoardItemProps {
   board: Board;
-  onSelect: () => void;
   isActive: boolean;
-  setIsDeleteDialogOpen: (isOpen: boolean) => void;
-  setBoardToDeleteID: (id: number) => void;
+  onSelect: () => void;
+  onDelete: () => void;
 }
-const BoardItem = ({
-  board,
-  onSelect,
-  isActive,
-  setIsDeleteDialogOpen,
-  setBoardToDeleteID
-}: BoardItemProps) => {
+
+const BoardItem = ({ board, isActive, onSelect, onDelete }: BoardItemProps) => {
   const theme = useTheme();
   const borderStyles = theme.custom.interactiveBorder;
 
   return (
     <Container disableGutters sx={{ mb: 1 }}>
       <Box
-        onClick={() => {
-          onSelect();
-        }}
+        onClick={onSelect}
         sx={{
           width: "95%",
           display: "flex",
@@ -69,7 +62,7 @@ const BoardItem = ({
             marginRight: 1,
           }}
         >
-          {board.logo}
+          {board.emoji}
         </Box>
         <Typography sx={{ flex: 1, fontSize: "0.8rem" }}>
           {board.name}
@@ -78,8 +71,7 @@ const BoardItem = ({
         <IconButton
           onClick={(e) => {
             e.stopPropagation();
-            setBoardToDeleteID(board.id);
-            setIsDeleteDialogOpen(true);
+            onDelete();
           }}
           size="small"
         >

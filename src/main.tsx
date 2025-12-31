@@ -1,14 +1,14 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import App from "./App.tsx";
 import AppThemeProvider from "./theme/AppThemeProvider.tsx";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Provider } from "react-redux";
 import { store, persistor } from "./store/index.ts";
+import AppRouter from "./routes/AppRouter.tsx";
 import { PersistGate } from "redux-persist/integration/react";
-import TaskManagerApp from "./TaskManagerApp.tsx";
-import App from "./App.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -16,7 +16,7 @@ createRoot(document.getElementById("root")!).render(
       <PersistGate loading={null} persistor={persistor}>
         <DndProvider backend={HTML5Backend}>
           <AppThemeProvider>
-            <App />
+            <AppRouter />
           </AppThemeProvider>
         </DndProvider>
       </PersistGate>
