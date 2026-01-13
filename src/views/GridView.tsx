@@ -16,7 +16,6 @@ import {
   type GridColDef,
   GridDeleteIcon,
   type GridRenderCellParams,
-  type GridRowId,
   type GridValidRowModel,
 } from "@mui/x-data-grid-premium";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -88,7 +87,6 @@ const GridView = ({
   const handleProcessRowUpdate = (
     newRow: GridValidRowModel,
     oldRow: GridValidRowModel,
-    params?: { rowId: GridRowId }
   ): GridValidRowModel => {
     const typedNewRow = newRow as TaskGridRow;
     const typedOldRow = oldRow as TaskGridRow;
@@ -229,7 +227,7 @@ const GridView = ({
       minWidth: 200,
       editable: true,
       hideable: false,
-      valueGetter: (value, row) => row.boardName || "Unknown Project",
+      valueGetter: (_, row) => row.boardName || "Unknown Project",
       renderCell: (params: GridRenderCellParams<TaskGridRow>) => (
         <Typography
           onClick={() => navigate(`/boards/${params.row.boardID}`)}
