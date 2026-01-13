@@ -78,7 +78,8 @@ const TaskManagerApp = () => {
     );
 
     const oldTask =
-      currentBoardTasks.find((task) => task.taskID === taskID) || {};
+      currentBoardTasks.find((task) => task.taskID === taskID);
+    if(!oldTask) return;
     const otherStatusTasks = currentBoardTasks.filter(
       (task) => task.taskID !== taskID && task.status !== newStatus
     );
