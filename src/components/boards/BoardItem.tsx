@@ -11,7 +11,7 @@ import type { Board } from "../../types";
 
 interface BoardItemProps {
   board: Board;
-  onSelect: () => void;
+  onSelect: () => void; 
   isActive: boolean;
   setIsDeleteDialogOpen: (isOpen: boolean) => void;
   setBoardToDeleteID: (id: number) => void;

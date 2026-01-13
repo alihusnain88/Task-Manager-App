@@ -25,9 +25,9 @@ const TaskCard = ({
 }: TaskCardProps) => {
   const theme = useTheme();
 
-  const handleDragOver = (e) => e.preventDefault();
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
 
-  const handleDragStart = (e) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData(
       "application/json",
       JSON.stringify({
@@ -39,8 +39,8 @@ const TaskCard = ({
     );
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault(); 
     e.stopPropagation();
     const data = JSON.parse(e.dataTransfer.getData("application/json"));
 

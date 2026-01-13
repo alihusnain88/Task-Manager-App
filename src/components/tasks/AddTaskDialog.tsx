@@ -378,7 +378,7 @@ const AddTaskDialog = ({
                   key={tag}
                   label={tag}
                   onDelete={() => setTags(tags.filter((curr) => curr !== tag))}
-                  sx={{
+                  sx={{ 
                     bgcolor: style.bg,
                     color: style.text,
                     m: 0.4,

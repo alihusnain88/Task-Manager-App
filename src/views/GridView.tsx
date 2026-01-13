@@ -9,15 +9,19 @@ import {
   TextField,
   useTheme,
   styled,
+  MenuItem,
 } from "@mui/material";
 import {
   DataGridPremium,
   type GridColDef,
   GridDeleteIcon,
+  type GridRenderCellParams,
+  type GridRowId,
+  type GridValidRowModel,
 } from "@mui/x-data-grid-premium";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { getTagColor } from "../utils/tagColorsHelper";
-import type { Board, Task, TaskGridRow } from "../types";
+import type { Board, Task, TaskGridRow, TaskStatus } from "../types";
 import { ToastContainer, toast } from "react-toastify";
 import AddImageDialog from "../components/dialoges/AddImageDialog";
 import DeleteConfirmDialog from "../components/dialoges/DeleteConfirmationDialog";
@@ -42,9 +46,9 @@ const StyledDataGrid = styled(DataGridPremium)(({ theme }) => ({
 
 interface GridViewProps {
   boards: Board[] | [];
-  setBoards;
+  setBoards: React.Dispatch<React.SetStateAction<Board[]>>;
   allTasks: Task[];
-  setAllTasks;
+  setAllTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   onDeleteTask: (id: number | null) => void;
 }
 const GridView = ({
@@ -81,34 +85,41 @@ const GridView = ({
     setSelectedRowID(rowID);
   };
 
-  const handleProcessRowUpdate = (newRow: TaskGridRow, oldRow: TaskGridRow) => {
-    if (newRow === oldRow) return oldRow;
+  const handleProcessRowUpdate = (
+    newRow: GridValidRowModel,
+    oldRow: GridValidRowModel,
+    params?: { rowId: GridRowId }
+  ): GridValidRowModel => {
+    const typedNewRow = newRow as TaskGridRow;
+    const typedOldRow = oldRow as TaskGridRow;
+
+    if (typedNewRow === typedOldRow) return typedOldRow;
 
     setAllTasks((prev: Task[]) =>
       prev.map((task) =>
-        task.taskID === newRow.taskID
+        task.taskID === typedNewRow.taskID
           ? {
               ...task,
-              boardID: newRow.boardID,
-              title: newRow.taskTitle,
-              status: newRow.status,
-              tags: newRow.tags || [],
-              background: newRow.background || null,
+              boardID: typedNewRow.boardID,
+              title: typedNewRow.taskTitle,
+              status: typedNewRow.status,
+              tags: typedNewRow.tags || [],
+              background: typedNewRow.background || null,
             }
           : task
       )
     );
-    if (newRow.boardName !== oldRow.boardName) {
+    if (typedNewRow.boardName !== typedOldRow.boardName) {
       setBoards((prev) =>
         prev.map((board) =>
-          board.id === newRow.boardID
-            ? { ...board, name: newRow.boardName }
+          board.id === typedNewRow.boardID
+            ? { ...board, name: typedNewRow.boardName }
             : board
         )
       );
     }
 
-    return newRow;
+    return typedNewRow;
   };
 
   const handleImageClick = (img: string) => {
@@ -148,7 +159,7 @@ const GridView = ({
     fileInputRef.current?.click();
   };
 
-  const handleUpdateImage = (e) => {
+  const handleUpdateImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && selectedRowID !== null) {
       const reader = new FileReader();
@@ -189,7 +200,7 @@ const GridView = ({
     const copiedTask = {
       ...originalTask,
       taskID: Date.now(),
-    };
+    } as Task;
 
     setAllTasks((prev) => {
       const index = prev.findIndex((task) => task.taskID === rowToCopy?.taskID);
@@ -219,7 +230,7 @@ const GridView = ({
       editable: true,
       hideable: false,
       valueGetter: (value, row) => row.boardName || "Unknown Project",
-      renderCell: (params) => (
+      renderCell: (params: GridRenderCellParams<TaskGridRow>) => (
         <Typography
           onClick={() => navigate(`/boards/${params.row.boardID}`)}
           sx={{
@@ -262,7 +273,7 @@ const GridView = ({
       hideable: false,
       valueParser: (value: string) => value?.trim(),
       valueSetter: (value, row) => ({ ...row, taskTitle: value }),
-      renderCell: (params) => (
+      renderCell: (params: GridRenderCellParams<TaskGridRow>) => (
         <Typography
           sx={{
             cursor: "pointer",
@@ -304,26 +315,104 @@ const GridView = ({
       editable: true,
       type: "singleSelect",
       valueOptions: ["backlog", "in-progress", "in-review", "completed"],
-      renderCell: (params) => {
-        const displayText = params.value
-          ? params.value
+      renderCell: (params: GridRenderCellParams<TaskGridRow>) => {
+        const statusValue = params.value as TaskStatus;
+        const displayText = statusValue
+          ? statusValue
               .split("-")
               .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
               .join(" ")
           : "";
 
         return (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              gap: 1.5,
+              width: "100%",
+              height: "100%",
+            }}
+          >
             <Box
               sx={{
                 width: 10,
                 height: 10,
                 borderRadius: "50%",
-                bgcolor: STATUS_DOTS[params.value] || "grey",
+                bgcolor: STATUS_DOTS[statusValue] || "grey",
               }}
             />
             <Typography>{displayText}</Typography>
           </Box>
+        );
+      },
+      renderEditCell: (params) => {
+        const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
+          { value: "backlog", label: "Backlog" },
+          { value: "in-progress", label: "In Progress" },
+          { value: "in-review", label: "In Review" },
+          { value: "completed", label: "Completed" },
+        ];
+
+        return (
+          <TextField
+            select
+            size="small"
+            value={params.value}
+            onChange={(e) =>
+              params.api.setEditCellValue({
+                id: params.id,
+                field: params.field,
+                value: e.target.value,
+              })
+            }
+            sx={{ width: "90%", mx: "auto" }}
+            SelectProps={{
+              renderValue: (selected) => {
+                const statusValue = selected as TaskStatus;
+                const option = STATUS_OPTIONS.find(
+                  (o) => o.value === statusValue
+                );
+                const label = option ? option.label : statusValue;
+
+                return (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        bgcolor: STATUS_DOTS[statusValue] || "grey",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Typography variant="body2" noWrap>
+                      {label}
+                    </Typography>
+                  </Box>
+                );
+              },
+            }}
+          >
+            {STATUS_OPTIONS.map((option) => (
+              <MenuItem
+                key={option.value}
+                value={option.value}
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <Box
+                  sx={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    bgcolor: STATUS_DOTS[option.value] || "grey",
+                  }}
+                />
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
         );
       },
     },
@@ -334,7 +423,7 @@ const GridView = ({
       flex: 0.8,
       minWidth: 240,
       editable: true,
-      renderCell: (params) => (
+      renderCell: (params: GridRenderCellParams<TaskGridRow>) => (
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", py: 1 }}>
           {params.value?.length > 0 ? (
             params.value?.map((tag: string) => {
@@ -408,7 +497,7 @@ const GridView = ({
             disableClearable
             options={TAG_OPTIONS}
             value={params.row.tags || []}
-            onChange={(e, newValue) => {
+            onChange={(e: React.SyntheticEvent, newValue: string[]) => {
               params.api.setEditCellValue(
                 {
                   id: params.id,
@@ -443,7 +532,7 @@ const GridView = ({
       headerName: "Image",
       flex: 0.5,
       minWidth: 140,
-      renderCell: (params) => {
+      renderCell: (params: GridRenderCellParams<TaskGridRow>) => {
         if (!params.value) {
           return (
             <Button
@@ -541,7 +630,7 @@ const GridView = ({
       flex: 0.5,
       minWidth: 140,
       disableExport: true,
-      renderCell: (params) => (
+      renderCell: (params: GridRenderCellParams<TaskGridRow>) => (
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <IconButton
             disableRipple

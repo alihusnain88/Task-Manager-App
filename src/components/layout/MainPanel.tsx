@@ -1,4 +1,4 @@
-import { Box, Container, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
 import TaskColumn from "../tasks/TaskColumn";
 import AddTaskDialog from "../tasks/AddTaskDialog";
@@ -85,7 +85,7 @@ const MainPanel = ({
         onAddTask={onAddTask}
         editingTask={editingTask}
         isEditing={isEditing}
-        onEditTask={onEditTask}
+        onEditTask={onEditTask} 
         setIsEditing={setIsEditing}
         setEditingTask={setEditingTask}
       />

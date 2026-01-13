@@ -16,7 +16,7 @@ interface AddImageDialogProps {
   onChangeImage: () => void;
 }
 
-const AddImageDialog = ({
+const AddImageDialog = ({ 
   open,
   image,
   onClose,

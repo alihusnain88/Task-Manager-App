@@ -1,5 +1,4 @@
-import React from "react";
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import BoardItem from "./BoardItem";
 import type { Board } from "../../types";
 
@@ -9,7 +8,6 @@ interface BoardsListProps {
   setActiveBoardID: (id: number) => void;
     setIsDeleteDialogOpen: (isOpen: boolean) => void;
     setBoardToDeleteID: (id: number) => void;
-
 }
 const BoardsList = ({
   boards,
@@ -27,7 +25,7 @@ const BoardsList = ({
       ) : (
         boards?.map((board) => (
           <BoardItem
-            key={board.id}
+            key={board.id} 
             board={board}
             isActive={board.id === activeBoardID}
             onSelect={() => setActiveBoardID(board.id)}

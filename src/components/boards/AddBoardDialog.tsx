@@ -218,7 +218,7 @@ const AddBoardDialog = ({
                 </Box>
               ))}
             </Box>
-          </Box>
+          </Box> 
         </DialogContent>
 
         <DialogActions
@@ -264,7 +264,7 @@ const AddBoardDialog = ({
               background: "none",
               "&: hover": {
                 backgroundColor: theme.palette.mode === "dark" ? "rgb(65, 65, 65)" : "rgb(196, 196, 196)",
-              }
+              } 
             }}
           >
             Cancel

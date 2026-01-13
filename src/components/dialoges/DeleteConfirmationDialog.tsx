@@ -5,6 +5,7 @@ import {
   DialogActions,
   Typography,
   Button,
+  useTheme,
 } from "@mui/material";
 
 interface DeleteConfirmDialogProps {
@@ -18,6 +19,7 @@ const DeleteConfirmDialog = ({
   onClose,
   onConfirm,
 }: DeleteConfirmDialogProps) => {
+  const theme = useTheme()
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle sx={{ fontWeight: 700, textAlign: "center" }}>
@@ -57,7 +59,9 @@ const DeleteConfirmDialog = ({
             borderRadius: 1,
             textTransform: "none",
             border: "1px solid",
-            "&:hover": { background: "action.hover" },
+            "&: hover": {
+                backgroundColor: theme.palette.mode === "dark" ? "rgb(65, 65, 65)" : "rgb(196, 196, 196)",
+              }
           }}
         >
           Cancel
@@ -68,3 +72,4 @@ const DeleteConfirmDialog = ({
 };
 
 export default DeleteConfirmDialog;
+ 

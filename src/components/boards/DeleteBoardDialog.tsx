@@ -7,7 +7,6 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React from "react";
 
 interface DeleteBoardDialogProps {
   isOpen: boolean;
@@ -67,7 +66,7 @@ const DeleteBoardDialog = ({
         </Button>
       </DialogActions>
     </Dialog>
-  );
+  ); 
 };
 
 export default DeleteBoardDialog;

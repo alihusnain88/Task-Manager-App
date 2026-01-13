@@ -3,4 +3,4 @@ export const STATUS_DOTS = {
   "in-progress": "#f59e0b",
   "in-review": "#a855f7",
   "completed": "#22c55e",
-};
+}; 

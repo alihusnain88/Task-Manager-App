@@ -1,4 +1,4 @@
-import React, { useMemo, useContext, useState } from "react";
+import React, { useState } from "react";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 
 export const ColorModeContext = React.createContext({
@@ -14,7 +14,7 @@ export default function AppThemeProvider({
 
   const toggleMode = () => {
     setMode((prev) => (prev === "dark" ? "light" : "dark"));
-  };
+  }; 
 
   const colorMode = { toggleColorMode: toggleMode };
 
@@ -36,21 +36,6 @@ export default function AppThemeProvider({
     },
 
     shape: { borderRadius: 5 },
-
-    shadows:
-      mode === "dark"
-        ? [
-            "none",
-            "0 1px 3px rgba(0,0,0,0.5)",
-            "0 4px 8px rgba(0,0,0,0.7)",
-            ...Array(22).fill("none"),
-          ]
-        : [
-            "none",
-            "0 1px 3px rgba(0,0,0,0.1)",
-            "0 4px 8px rgba(0,0,0,0.15)",
-            ...Array(22).fill("none"),
-          ],
 
     typography: {
       fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',

@@ -32,9 +32,9 @@ const TaskColumn = ({
   
   const sortedTasks = [...tasks].sort((a, b) => a.priority - b.priority);
   const theme = useTheme()
-  const handleDragOver = (e) => e.preventDefault();
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault(); 
 
     const data = JSON.parse(e.dataTransfer.getData("application/json"));
@@ -100,7 +100,7 @@ const TaskColumn = ({
             sx={{
               mt: 1,
               px: { xs: 0.7, sm: 2, md: 2 },
-              gap: { sm: 0.5, md: 2 },
+              gap: { sm: 0.5, md: 2 }, 
               height: { xs: 30, sm: 40, md: 30 },
               width: "100%",
               borderRadius: { xs: "8px", md: "10px" },

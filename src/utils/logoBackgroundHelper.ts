@@ -3,4 +3,4 @@ export const getLogoBackground = (): string => {
   const g = Math.floor(200 + Math.random() * 55);
   const b = Math.floor(200 + Math.random() * 55);
   return `rgb(${r},${g},${b})`;
-};
+}; 
