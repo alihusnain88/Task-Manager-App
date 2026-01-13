@@ -31,7 +31,7 @@
       "boardID": 0,
       "taskID": 1,
       "title": "Pay electricity bill",
-      "status": "backlog",
+      "status": "in-review",
       "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
       "tags": ["Finance", "Urgent"],
       "priority": 2
@@ -94,7 +94,7 @@
       "boardID": 2,
       "taskID": 8,
       "title": "Order birthday gift",
-      "status": "in-progress",
+      "status": "in-review",
       "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
       "tags": ["Gift", "Family"],
       "priority": 1

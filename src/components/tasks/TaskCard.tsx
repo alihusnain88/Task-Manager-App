@@ -6,13 +6,6 @@ interface TaskCardProps {
   activeBoardID: number | null;
   task: Task;
   index: number;
-  onReorder: (params: {
-    boardID: number;
-    fromStatus: TaskStatus;
-    toStatus: TaskStatus;
-    fromIndex: number;
-    toIndex: number;
-  }) => void;
   onMoveTask: (taskID: number, newStatus: TaskStatus, toIndex: number) => void;
   setIsOpen: (open: boolean) => void;
   editingTask: Task | null;
@@ -21,8 +14,18 @@ interface TaskCardProps {
   setIsEditing: (editing: boolean) => void;
 }
 
-const TaskCard = ({ activeBoardID, task, index, onReorder, onMoveTask, setIsOpen, setEditingTask, setIsEditing}: TaskCardProps) => {
+const TaskCard = ({
+  activeBoardID,
+  task,
+  index,
+  onMoveTask,
+  setIsOpen,
+  setEditingTask,
+  setIsEditing,
+}: TaskCardProps) => {
   const theme = useTheme();
+
+  const handleDragOver = (e) => e.preventDefault();
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData(
@@ -36,24 +39,12 @@ const TaskCard = ({ activeBoardID, task, index, onReorder, onMoveTask, setIsOpen
     );
   };
 
-  const handleDragOver = (e) => e.preventDefault();
-
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     const data = JSON.parse(e.dataTransfer.getData("application/json"));
 
-    if (data.fromStatus === task.status) {
-      onReorder({
-        boardID: data.boardID,
-        fromStatus: data.fromStatus,
-        toStatus: task.status,
-        fromIndex: data.fromIndex,
-        toIndex: index,
-      });
-    } else {
-      onMoveTask(data.taskID, task.status, index);
-    }
+    onMoveTask(data.taskID, task.status, index);
   };
 
   return (
@@ -62,10 +53,10 @@ const TaskCard = ({ activeBoardID, task, index, onReorder, onMoveTask, setIsOpen
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      onClick={()=>{
-        setIsOpen(true)
-        setIsEditing(true)
-        setEditingTask(task)
+      onClick={() => {
+        setIsOpen(true);
+        setIsEditing(true);
+        setEditingTask(task);
       }}
       sx={{
         p: 1,

@@ -61,8 +61,12 @@ const AddTaskDialog = ({
   const [background, setBackground] = useState<string | null>(null);
 
   useEffect(() => {
-    if(!isOpen) return;
-    if (isEditing && editingTask !== null && editingTask.boardID === activeBoardID) {
+    if (!isOpen) return;
+    if (
+      isEditing &&
+      editingTask !== null &&
+      editingTask.boardID === activeBoardID
+    ) {
       setTitle(editingTask.title || "");
       setStatus(editingTask.status || "backlog");
       setTags(editingTask.tags || []);
@@ -73,6 +77,7 @@ const AddTaskDialog = ({
       setTags([]);
       setBackground(null);
     }
+    setError("");
   }, [isOpen, isEditing, editingTask, activeBoardID]);
 
   const handleAddTag = () => {
@@ -83,40 +88,38 @@ const AddTaskDialog = ({
   };
 
   const handleSave = () => {
-  if (!title.trim()) {
-    setError("Name required");
-    return;
-  }
-  if (activeBoardID === null) return;
+    if (!title.trim()) {
+      setError("Name required");
+      return;
+    }
+    if (activeBoardID === null) return;
 
-  if (editingTask) {
-    onEditTask({
-      ...editingTask,
-      title,
-      status,
-      tags,
-      background,
-    });
-  } else {
-    onAddTask({
-      taskID: totalTasksForBoard + 1,
-      boardID: activeBoardID,
-      title,
-      status,
-      tags,
-      background,
-      priority: totalTasksForBoard + 1,
-    });
-  }
-  handleCloseDialog();
-
-};
-const handleCloseDialog = () => {
-  setIsEditing(false);
-  setEditingTask(null);
-  onClose();
-};
-
+    if (editingTask) {
+      onEditTask({
+        ...editingTask,
+        title,
+        status,
+        tags,
+        background,
+      });
+    } else {
+      onAddTask({
+        taskID: Date.now(),
+        boardID: activeBoardID,
+        title,
+        status,
+        tags,
+        background,
+        priority: totalTasksForBoard + 1,
+      });
+    }
+    handleCloseDialog();
+  };
+  const handleCloseDialog = () => {
+    setIsEditing(false);
+    setEditingTask(null);
+    onClose();
+  };
 
   const inputSx = {
     "& .MuiInputBase-root": { height: 22, borderRadius: "6px" },
@@ -140,10 +143,14 @@ const handleCloseDialog = () => {
         paper: {
           sx: {
             position: "fixed",
-            right: 30,
-            top: "35%",
-            width: "20vw",
-            maxHeight: "60vh",
+            right: { xs: "auto", sm: 25, md: 30 },
+            top: { xs: "25%", sm: "30%", md: "35%" },
+            width: {
+              xs: "60vw",
+              sm: "40vw",
+              md: "22vw",
+            },
+            maxHeight: { xs: "75vh", sm: "65vh", md: "55vh" },
             borderRadius: "20px",
             background: `
             linear-gradient(#121212, #121212) padding-box,
@@ -151,6 +158,7 @@ const handleCloseDialog = () => {
           `,
             border: "6px solid transparent",
             boxShadow: "0 20px 50px rgba(0, 0, 0, 0.6)",
+            scrollbarWidth: 'none'
           },
         },
       }}
@@ -170,7 +178,7 @@ const handleCloseDialog = () => {
             justifyContent: "space-between",
             alignItems: "center",
             px: 2,
-            fontSize: 14,
+            fontSize: { xs: 20, sm: 18, md: 14 },
             fontWeight: "bold",
             pb: 1,
           }}
@@ -257,7 +265,7 @@ const handleCloseDialog = () => {
 
           <Box>
             <Typography
-              fontSize="0.5rem"
+              fontSize={{ xs: "0.9rem", sm: "0.8rem", md: "0.7rem" }}
               gutterBottom
               sx={{ color: theme.palette.text.primary }}
             >
@@ -279,7 +287,7 @@ const handleCloseDialog = () => {
 
           <Box>
             <Typography
-              fontSize="0.5rem"
+              fontSize={{ xs: "0.9rem", sm: "0.8rem", md: "0.7rem" }}
               gutterBottom
               sx={{ color: theme.palette.text.primary }}
             >
@@ -357,7 +365,7 @@ const handleCloseDialog = () => {
 
           <Box>
             <Typography
-              fontSize="0.5rem"
+              fontSize={{ xs: "0.9rem", sm: "0.8rem", md: "0.7rem" }}
               gutterBottom
               sx={{ color: theme.palette.text.primary }}
             >
@@ -401,31 +409,55 @@ const handleCloseDialog = () => {
             pb: 2,
             pt: 0,
             display: "flex",
-            justifyContent: "start",
+            justifyContent: { xs: "space-evenly", md: "start" },
+            gap: 1,
             marginTop: "4px",
           }}
         >
           <Button
             variant="contained"
+            disableElevation
+            disableRipple
             endIcon={<CheckIcon />}
             onClick={handleSave}
             size="small"
             sx={{
               fontSize: "0.7rem",
-              color: theme.palette.text.primary,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgb(195, 218, 250)"
+                  : "rgb(81, 81, 81)",
+              color:
+                theme.palette.mode === "dark"
+                  ? "rgb(51, 86, 211)"
+                  : "rgb(242, 242, 242)",
               borderRadius: "20px",
+              "&: hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgb(195, 218, 250)"
+                    : "rgb(81, 81, 81)",
+              },
             }}
           >
             Save
           </Button>
           <Button
             variant="outlined"
+            disableElevation
+            disableRipple
             size="small"
             onClick={handleCloseDialog}
             sx={{
-              border: "1.5px solid #696969",
               fontSize: "0.7rem",
+              border: "1.5px solid #696969",
               background: "none",
+              "&: hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgb(65, 65, 65)"
+                    : "rgb(196, 196, 196)",
+              },
             }}
           >
             Cancel

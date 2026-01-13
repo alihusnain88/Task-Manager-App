@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Container } from "@mui/material";
+import { Box, Typography, Button, Container, useTheme } from "@mui/material";
 import TaskCard from "./TaskCard";
 import AddIcon from "@mui/icons-material/Add";
 import { STATUS_DOTS } from "../../utils/coloredDotsHelper";
@@ -10,19 +10,6 @@ interface TaskColumnProps {
   tasks: Task[];
   onOpen: () => void;
   onMoveTask: (taskID: number, newStatus: TaskStatus, toIndex: number) => void;
-  onReorderTask: ({
-    boardID,
-    fromStatus,
-    toStatus,
-    fromIndex,
-    toIndex,
-  }: {
-    boardID: number;
-    fromStatus: TaskStatus;
-    toStatus: TaskStatus;
-    fromIndex: number;
-    toIndex: number;
-  }) => void;
   setIsOpen: (isOpen: boolean) => void;
   editingTask: Task | null;
   setEditingTask: (task: Task | null) => void;
@@ -36,28 +23,23 @@ const TaskColumn = ({
   tasks,
   onOpen,
   onMoveTask,
-  onReorderTask,
   setIsOpen,
   editingTask,
   setEditingTask,
   isEditing,
   setIsEditing,
 }: TaskColumnProps) => {
+  
   const sortedTasks = [...tasks].sort((a, b) => a.priority - b.priority);
+  const theme = useTheme()
   const handleDragOver = (e) => e.preventDefault();
 
   const handleDrop = (e) => {
-    e.preventDefault();
-    const rawData = e.dataTransfer.getData("application/json");
-    if (!rawData) return;
+    e.preventDefault(); 
 
-    const data = JSON.parse(rawData);
+    const data = JSON.parse(e.dataTransfer.getData("application/json"));
 
-    const taskID = Number(data.taskID);
-
-    if (data.fromStatus !== column.key) {
-      onMoveTask(taskID, column.key, sortedTasks?.length || 0);
-    }
+    onMoveTask(data.taskID, column.key, sortedTasks?.length || 0);
   };
 
   return (
@@ -98,7 +80,6 @@ const TaskColumn = ({
               activeBoardID={activeBoardID}
               task={task}
               index={index}
-              onReorder={onReorderTask}
               onMoveTask={onMoveTask}
               setIsOpen={setIsOpen}
               editingTask={editingTask}
@@ -112,18 +93,21 @@ const TaskColumn = ({
         {column.key === "backlog" && (
           <Button
             variant="contained"
+            disableElevation
+            disableRipple
             onClick={onOpen}
             endIcon={<AddIcon />}
             sx={{
               mt: 1,
-              gap: 2,
-              height: "30px",
+              px: { xs: 0.7, sm: 2, md: 2 },
+              gap: { sm: 0.5, md: 2 },
+              height: { xs: 30, sm: 40, md: 30 },
               width: "100%",
-              borderRadius: "10px",
-              fontSize: "0.7rem",
-              backgroundColor: "rgb(195 218 250)",
-              color: "rgb(51 86 211)",
-              "&:hover": { backgroundColor: "rgb(199 222 254)" },
+              borderRadius: { xs: "8px", md: "10px" },
+              fontSize: { xs: "0.55rem", sm: "0.9rem", md: "0.7rem" },
+              backgroundColor: theme.palette.mode === "dark" ? "rgb(195, 218, 250)" : "rgb(81, 81, 81)",
+              color: theme.palette.mode === "dark" ? "rgb(51, 86, 211)" : "rgb(242, 242, 242)",
+              "&:hover": { backgroundColor: theme.palette.mode === "dark" ? "rgb(168, 198, 239)" : "rgb(75, 75, 75)"},
             }}
           >
             Add new task card

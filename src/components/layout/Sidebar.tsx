@@ -29,10 +29,9 @@ const Sidebar = ({
   return (
     <Box
       sx={{
-        minHeight: "100%",
+        height: "100%",
         overflowY: "auto",
         scrollbarWidth: "none",
-        width: "25%",
         pt: 2,
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary,

@@ -1,4 +1,4 @@
-import { Container, Typography, useTheme } from "@mui/material";
+import { Box, Container, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
 import TaskColumn from "../tasks/TaskColumn";
 import AddTaskDialog from "../tasks/AddTaskDialog";
@@ -11,13 +11,6 @@ interface MainPanelProps {
   totalTasksForBoard: number;
   onAddTask: (task: Task) => void;
   onMoveTask: (taskID: number, newStatus: TaskStatus, toIndex: number) => void;
-  onReorderTask: (
-    boardID: number,
-    fromStatus: TaskStatus,
-    toStatus: TaskStatus,
-    fromIndex: number,
-    toIndex: number
-  ) => void;
   onEditTask: (task: Task) => void;
 }
 const COLUMNS: Column[] = [
@@ -34,7 +27,6 @@ const MainPanel = ({
   totalTasksForBoard,
   onAddTask,
   onMoveTask,
-  onReorderTask,
   onEditTask,
 }: MainPanelProps) => {
   const theme = useTheme();
@@ -43,19 +35,20 @@ const MainPanel = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   return (
-    <Container
-      sx={{
-        minHeight: "100%",
-        overflow: "scroll",
+    <Box
+    sx={{
+        flex: 1,
+        height: "100%",
         scrollbarWidth: "none",
         backgroundColor: theme.palette.background.default,
-        flex: 1,
         borderRadius: "10px",
         display: "flex",
-        alignItems: "start",
-        padding: 2,
-        paddingLeft: 4,
+        alignItems: "flex-start",
         gap: 0.8,
+        px: { xs: 2, sm: 3, md: 4 },
+        py: 2,
+        overflowX: { xs: "auto", md: "hidden" },
+        overflowY: "auto",
       }}
     >
       {totalBoards! > 0 && activeBoardID !== null ? (
@@ -71,7 +64,6 @@ const MainPanel = ({
               setIsOpen(true);
             }}
             onMoveTask={onMoveTask}
-            onReorderTask={onReorderTask}
             setIsOpen={setIsOpen}
             editingTask={editingTask}
             setEditingTask={setEditingTask}
@@ -97,7 +89,7 @@ const MainPanel = ({
         setIsEditing={setIsEditing}
         setEditingTask={setEditingTask}
       />
-    </Container>
+    </Box>
   );
 };
 

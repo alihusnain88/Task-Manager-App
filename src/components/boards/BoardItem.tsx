@@ -38,7 +38,7 @@ const BoardItem = ({
           justifyContent: "space-between",
           alignItems: "center",
           borderRadius: theme.shape.borderRadius,
-          p: theme.spacing(1),
+          p: 1,
           cursor: "pointer",
           backgroundColor: borderStyles.background,
           border: `${borderStyles.width} solid ${

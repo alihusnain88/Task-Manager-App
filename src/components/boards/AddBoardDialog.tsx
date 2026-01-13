@@ -50,6 +50,11 @@ const AddBoardDialog = ({
   const [logo, setlogo] = useState<string>(BOARD_LOGOS[0]);
   const [error, setError] = useState<string>("");
 
+  const handleResetValues = () => {
+    setName("");
+    setlogo(BOARD_LOGOS[0]);
+    setError("");
+  }
   const handleSave = () => {
     if (!name.trim()) {
       setError("Board name required");
@@ -61,7 +66,7 @@ const AddBoardDialog = ({
     }
 
     const newBoard = {
-      id: boards[boards?.length - 1]?.id + 1 || 0,
+      id: Date.now(),
       name,
       logo,
       color: getLogoBackground(),
@@ -70,30 +75,37 @@ const AddBoardDialog = ({
     onAddBoard(newBoard);
 
     onClose();
-    setName("");
-    setlogo(BOARD_LOGOS[0]);
-    setError("");
+    handleResetValues();
   };
 
   return (
     <Dialog
       open={isOpen}
-      onClose={onClose}
-      fullWidth
-      maxWidth="sm"
+      onClose={()=>{
+        onClose()
+        handleResetValues()
+      }}
       slotProps={{
         backdrop: {
           sx: { backgroundColor: "transparent" },
         },
         paper: {
           sx: {
-            height: "43vh",
-            width: "25vw",
+            height: {
+              xs: "auto",
+              md: "42vh",
+            },
+            width: {
+              xs: "70vw",
+              sm: "50vw",
+              md: "25vw",
+            },
+
             borderRadius: 1,
             overflow: "hidden",
             position: "fixed",
-            top: "0",
-            left: "30px",
+            top: { xs: "10%", md: "0" },
+            left: { xs: "auto", md: "5%" },
             display: "flex",
             flexDirection: "column",
             background: `
@@ -116,6 +128,7 @@ const AddBoardDialog = ({
       >
         <DialogTitle
           sx={{
+            fontSize: { xs: "1rem", md: "0.9rem" },
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -124,10 +137,17 @@ const AddBoardDialog = ({
             color: "#cecacaff",
           }}
         >
-          <Typography fontSize="0.9rem" color={theme.palette.text.primary}>
+          <Typography
+            fontSize={{ xs: "1.6rem", md: "1.4rem" }}
+            color={theme.palette.text.primary}
+          >
             New Board
           </Typography>
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={()=>{
+        onClose()
+        handleResetValues()
+      }}
+       size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -144,7 +164,7 @@ const AddBoardDialog = ({
           }}
         >
           <Box>
-            <Typography fontSize="0.7rem" gutterBottom>
+            <Typography fontSize={{ xs: "1rem", md: "0.9rem" }} gutterBottom>
               Board Name
             </Typography>
             <TextField
@@ -170,7 +190,7 @@ const AddBoardDialog = ({
           </Box>
 
           <Box>
-            <Typography fontSize="0.7rem" gutterBottom>
+            <Typography fontSize={{ xs: "1rem", md: "0.9rem" }} gutterBottom>
               Logo
             </Typography>
             <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
@@ -207,31 +227,44 @@ const AddBoardDialog = ({
             py: 1,
             gap: 1,
             display: "flex",
-            justifyContent: "start",
+            justifyContent: { xs: "space-evenly ", md: "start" },
           }}
         >
           <Button
             variant="contained"
+            disableElevation
+            disableRipple
             endIcon={<CheckIcon />}
             onClick={handleSave}
             size="small"
             sx={{
               fontSize: "0.7rem",
               textTransform: "none",
-              backgroundColor:
-                theme.components?.MuiButton?.styleOverrides?.root?.backgroudColor,
+              backgroundColor: theme.palette.mode === "dark" ? "rgb(195, 218, 250)" : "rgb(81, 81, 81)",
+              color: theme.palette.mode === "dark" ? "rgb(51, 86, 211)" : "rgb(242, 242, 242)",
+              "&: hover": {
+                backgroundColor: theme.palette.mode === "dark" ? "rgb(195, 218, 250)" : "rgb(81, 81, 81)",
+              }
             }}
           >
             Create Board
           </Button>
           <Button
             variant="outlined"
+            disableElevation
+            disableRipple
             size="small"
-            onClick={onClose}
+            onClick={()=>{
+        onClose()
+        handleResetValues()
+      }}
             sx={{
               border: "1.5px solid #696969",
               fontSize: "0.7rem",
               background: "none",
+              "&: hover": {
+                backgroundColor: theme.palette.mode === "dark" ? "rgb(65, 65, 65)" : "rgb(196, 196, 196)",
+              }
             }}
           >
             Cancel

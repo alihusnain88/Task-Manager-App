@@ -8,6 +8,7 @@ import {
   Autocomplete,
   TextField,
   useTheme,
+  styled,
 } from "@mui/material";
 import {
   DataGridPremium,
@@ -20,9 +21,26 @@ import type { Board, Task, TaskGridRow } from "../types";
 import { ToastContainer, toast } from "react-toastify";
 import AddImageDialog from "../components/dialoges/AddImageDialog";
 import DeleteConfirmDialog from "../components/dialoges/DeleteConfirmationDialog";
+import { STATUS_DOTS } from "../utils/coloredDotsHelper";
+
+const StyledDataGrid = styled(DataGridPremium)(({ theme }) => ({
+  "& .MuiDataGrid-cell": {
+    color: theme.palette.text.primary,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    padding: { xs: 1, sm: 1.5, md: 2 },
+  },
+
+  "& .MuiDataGrid-columnHeader": {
+    backgroundColor: theme.palette.background.default,
+  },
+  "& .MuiDataGrid-columnHeaderTitle": {
+    fontWeight: 600,
+  },
+}));
 
 interface GridViewProps {
-  onToggleView: () => void;
   boards: Board[] | [];
   setBoards;
   allTasks: Task[];
@@ -30,7 +48,6 @@ interface GridViewProps {
   onDeleteTask: (id: number | null) => void;
 }
 const GridView = ({
-  onToggleView,
   boards,
   setBoards,
   allTasks,
@@ -38,7 +55,6 @@ const GridView = ({
   onDeleteTask,
 }: GridViewProps) => {
   const theme = useTheme();
-  const notify = () => toast("Row Copied!");
   const rows = allTasks.map((task, index) => {
     return {
       id: index + 1,
@@ -114,6 +130,7 @@ const GridView = ({
         )
       );
       setSelectedImage(null);
+      setIsOpen(false);
     }
     toast.success("Image Removed", {
       position: "top-right",
@@ -198,6 +215,7 @@ const GridView = ({
       field: "boardName",
       headerName: "Board",
       flex: 1,
+      minWidth: 200,
       editable: true,
       hideable: false,
       valueGetter: (value, row) => row.boardName || "Unknown Project",
@@ -206,7 +224,6 @@ const GridView = ({
           onClick={() => navigate(`/boards/${params.row.boardID}`)}
           sx={{
             cursor: "pointer",
-            fontSize: 13,
             fontWeight: 400,
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -222,10 +239,10 @@ const GridView = ({
         </Typography>
       ),
       renderEditCell: (params) => (
-        <input
-          type="text"
+        <TextField
+          size="small"
           defaultValue={params.value}
-          style={{ width: "100%" }}
+          sx={{ width: "90%", mx: "auto" }}
           onChange={(e) =>
             params.api.setEditCellValue({
               id: params.id,
@@ -240,6 +257,7 @@ const GridView = ({
       field: "taskTitle",
       headerName: "Task",
       flex: 1,
+      minWidth: 220,
       editable: true,
       hideable: false,
       valueParser: (value: string) => value?.trim(),
@@ -248,8 +266,7 @@ const GridView = ({
         <Typography
           sx={{
             cursor: "pointer",
-            fontSize: 13,
-            fontWeight: 400,
+            fontWeight: 700,
             overflow: "hidden",
             textOverflow: "ellipsis",
             height: "100%",
@@ -265,10 +282,10 @@ const GridView = ({
         </Typography>
       ),
       renderEditCell: (params) => (
-        <input
-          type="text"
+        <TextField
+          size="small"
           defaultValue={params.value}
-          style={{ width: "100%" }}
+          sx={{ width: "90%", mx: "auto" }}
           onChange={(e) =>
             params.api.setEditCellValue({
               id: params.id,
@@ -282,22 +299,40 @@ const GridView = ({
     {
       field: "status",
       headerName: "Status",
-      flex: 1,
+      flex: 0.8,
+      minWidth: 180,
       editable: true,
       type: "singleSelect",
       valueOptions: ["backlog", "in-progress", "in-review", "completed"],
-      valueFormatter: (value: string) =>
-        value
-          ? value
+      renderCell: (params) => {
+        const displayText = params.value
+          ? params.value
               .split("-")
               .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
               .join(" ")
-          : "",
+          : "";
+
+        return (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              sx={{
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                bgcolor: STATUS_DOTS[params.value] || "grey",
+              }}
+            />
+            <Typography>{displayText}</Typography>
+          </Box>
+        );
+      },
     },
+
     {
       field: "tags",
       headerName: "Tags",
-      flex: 1,
+      flex: 0.8,
+      minWidth: 240,
       editable: true,
       renderCell: (params) => (
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", py: 1 }}>
@@ -325,25 +360,35 @@ const GridView = ({
                     bgcolor: bg,
                     color: text,
                     border: `1px solid ${text}`,
-                    borderRadius: "200px",
-                    fontSize: 7,
-                    fontWeight: 700,
+                    borderRadius: "800px",
+                    fontSize: { xs: 7, sm: 8, md: 9 },
+                    fontWeight: 600,
                     textTransform: "capitalize",
                     letterSpacing: 0.5,
                     cursor: "pointer",
+                    "&:hover": {
+                      opacity: 0.85,
+                      transform: "scale(1.05)",
+                    },
                   }}
                 >
                   {tag}
-                  {/* <IconButton sx={{color: 'black', height: '0px', width: '0px', border: '1px solid black', padding: 1.5,}}>
-                  <GridCloseIcon />
+                  {/* <IconButton
+                    sx={{
+                      color: "black",
+                      height: 0,
+                      width: 0,
+                      border: "1px solid black",
+                      padding: 0,
+                    }}
+                  >
+                    <GridCloseIcon fontSize="small" />
                   </IconButton> */}
                 </Typography>
               );
             })
           ) : (
-            <Typography sx={{ fontSize: "small", color: "#971616ff" }}>
-              No Tags
-            </Typography>
+            <Typography sx={{ color: "#971616ff" }}>No Tags</Typography>
           )}
         </Box>
       ),
@@ -360,6 +405,7 @@ const GridView = ({
           <Autocomplete
             multiple
             freeSolo
+            disableClearable
             options={TAG_OPTIONS}
             value={params.row.tags || []}
             onChange={(e, newValue) => {
@@ -395,23 +441,17 @@ const GridView = ({
     {
       field: "background",
       headerName: "Image",
-      flex: 0.6,
+      flex: 0.5,
+      minWidth: 140,
       renderCell: (params) => {
         if (!params.value) {
           return (
-            <Typography
+            <Button
+              size="small"
               sx={{
-                cursor: "pointer",
-                fontSize: 13,
-                fontWeight: 400,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                height: "100%",
-                alignContent: "center",
-                justifyItems: "self-start",
-                "&:hover": {
-                  color: "primary.main",
-                },
+                fontSize: "0.7rem",
+                textTransform: "none",
+                color: "text.secondary",
               }}
               onClick={() => {
                 setSelectedRowID(params.row.id);
@@ -419,7 +459,7 @@ const GridView = ({
               }}
             >
               Add Image
-            </Typography>
+            </Button>
           );
         }
         return (
@@ -430,8 +470,8 @@ const GridView = ({
               alt="task-thumb"
               onClick={() => handleImageClick(params.value)}
               sx={{
-                width: 36,
-                height: 36,
+                width: { xs: 28, sm: 36 },
+                height: { xs: 28, sm: 36 },
                 color: "black",
                 borderRadius: 1,
                 cursor: "pointer",
@@ -444,53 +484,96 @@ const GridView = ({
         );
       },
     },
+    // {
+    //   field: "delete",
+    //   headerName: "Delete",
+    //   disableExport: true,
+    //   flex: 0.5,
+    //   minWidth: 140,
+    //   renderCell: (params) => (
+    //     <IconButton
+    //       disableRipple
+    //       sx={{
+    //         margin: 0,
+    //         padding: 0,
+    //         display: "flex",
+    //         justifyContent: "center",
+    //         alignItems: "center",
+    //         height: "100%",
+    //         color: theme.palette.text.primary,
+    //       }}
+    //       onClick={() => {
+    //         setTaskToDeleteID(params.row.taskID);
+    //         setIsDeleteDialogOpen(true);
+    //       }}
+    //     >
+    //       <GridDeleteIcon />
+    //     </IconButton>
+    //   ),
+    // },
+    // {
+    //   field: "copy-row",
+    //   headerName: "Copy",
+    //   disableExport: true,
+    //   flex: 0.5,
+    //   minWidth: 140,
+    //   renderCell: (params) => (
+    //     <IconButton
+    //       disableRipple
+    //       sx={{
+    //         height: "100%",
+    //         margin: 0,
+    //         padding: 0,
+    //         display: "flex",
+    //         justifyContent: "center",
+    //         alignItems: "center",
+    //         color: theme.palette.text.primary,
+    //       }}
+    //       onClick={() => handleCopyRow(params.row.id)}
+    //     >
+    //       <ContentCopyIcon fontSize="small" />
+    //     </IconButton>
+    //   ),
+    // },
     {
-      field: "delete",
-      headerName: "Delete Row",
-      disableExport: true,
+      field: "actions",
+      headerName: "Actions",
       flex: 0.5,
-      renderCell: (params) => (
-        <IconButton
-          disableRipple
-          sx={{
-            margin: 0,
-            padding: 0,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-            color: theme.palette.text.primary
-          }}
-          onClick={() => {
-            setTaskToDeleteID(params.row.taskID);
-            setIsDeleteDialogOpen(true);
-          }}
-        >
-          <GridDeleteIcon />
-        </IconButton>
-      ),
-    },
-    {
-      field: "copy-row",
-      headerName: "Copy Row",
+      minWidth: 140,
       disableExport: true,
-      flex: 0.5,
       renderCell: (params) => (
-        <IconButton
-          disableRipple
-          sx={{
-            height: "100%",
-            margin: 0,
-            padding: 0,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            color: theme.palette.text.primary
-          }}
-          onClick={() => handleCopyRow(params.row.id)}
-        >
-          <ContentCopyIcon fontSize="small" />
-        </IconButton>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <IconButton
+            disableRipple
+            sx={{
+              padding: 0,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: theme.palette.text.primary,
+            }}
+            onClick={() => {
+              setTaskToDeleteID(params.row.taskID);
+              setIsDeleteDialogOpen(true);
+            }}
+          >
+            <GridDeleteIcon />
+          </IconButton>
+
+          <IconButton
+            disableRipple
+            sx={{
+              padding: 0,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: theme.palette.text.primary,
+            }}
+            onClick={() => handleCopyRow(params.row.id)}
+          >
+            <ContentCopyIcon fontSize="small" />
+          </IconButton>
+        </Box>
       ),
     },
   ];
@@ -503,13 +586,9 @@ const GridView = ({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: 0,
-
-        backgroundImage:
-          "url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROPjjQa19O8Fsew-uX_WYE4MQtngjdqf2gLQ&s')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
+        backgroundColor: theme.palette.mode === "dark" ? "#0f172a" : "#c5cdd4",
+        pt: 1,
+        pb: 1,
       }}
     >
            
@@ -520,92 +599,105 @@ const GridView = ({
         accept="image/*"
         onChange={handleUpdateImage}
       />
-      <Button
-        onClick={onToggleView}
+      <Box
         sx={{
-          position: "fixed",
-          left: 10,
-          top: 15,
-          p: 1.2,
-          borderRadius: "8px",
-          color: "white",
-          backgroundColor: "#7b1a1aff",
-          "&:hover": { backgroundColor: "#bc2222ff" },
+          width: "100%",
+          px: 1,
+          mb: 1,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          // border: '1px solid red'
         }}
       >
-        Panel View 
-      </Button>
+        <Button
+          disableElevation
+          disableRipple
+          onClick={() => navigate("/")}
+          sx={{
+            height: 40,
+            borderRadius: "8px",
+            color: "white",
+            backgroundColor: "#7b1a1aff",
+            fontSize: { xs: "0.75rem", md: "0.9rem" },
+            px: { xs: 1.5, md: 2 },
+            py: { xs: 0.5, md: 0.75 },
+            whiteSpace: "nowrap",
+            "&:hover": { backgroundColor: "#bc2222ff" },
+          }}
+        >
+          Panel View
+        </Button>
+           
+        <Typography
+          variant="h4"
+          textAlign="center"
+          sx={{
+            width: "100vw",
+            textAlign: "center",
+            fontSize: { xs: "1rem", sm: "1.5rem", md: "2rem" },
+            fontWeight: "bold",
+            color: "text.primary",
+          }}
+        >
+          Boards & Tasks Grid    
+        </Typography>
+      </Box>
          
-      <Typography
-        variant="h4"
-        textAlign="center"
-        sx={{ fontWeight: 700, color: "white" }}
-      >
-      Boards & Tasks Grid    
-      </Typography>
-         
-      <DataGridPremium
-        rows={rows}
-        columns={columns}
-        disableRowSelectionOnClick
-        processRowUpdate={handleProcessRowUpdate}
-        showToolbar
-        onRowClick={(params) => handleRowClick(params.row.id)}
+      <Box
         sx={{
-          width: "80vw",
-          minHeight: "60vh",
-          borderRadius: 2,
-
-          backgroundColor: theme.palette.background.paper,
-          color: theme.palette.text.primary,
-
-          "& .MuiDataGrid-cell": {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            padding: 2
-          },
-        }}
-      ></DataGridPremium>
-      {/* <Box
-        sx={{
-          position: "fixed",
-          right: 20,
-          top: 20,
+          width: "90%",
+          overflowX: "auto",
         }}
       >
-        <ThemeToggleButtons />
-      </Box> */}
-      <AddImageDialog
-        open={isOpen}
-        image={selectedImage}
-        onClose={() => setIsOpen(false)}
-        onRemoveImage={handleRemoveImage}
-        onChangeImage={openFileSelect}
-      />
-      <DeleteConfirmDialog
-        open={isDeleteDialogOpen}
-        onClose={() => {
-          setIsDeleteDialogOpen(false);
-          setTaskToDeleteID(null);
-        }}
-        onConfirm={() => {
-          onDeleteTask(taskToDeleteID);
-          setIsDeleteDialogOpen(false);
-          setTaskToDeleteID(null);
+        <StyledDataGrid
+          rows={rows}
+          columns={columns}
+          disableRowSelectionOnClick
+          processRowUpdate={handleProcessRowUpdate}
+          showToolbar
+          onRowClick={(params) => handleRowClick(params.row.id)}
+          sx={{
+            margin: "auto",
+            maxWidth: 1300,
+            minHeight: { xs: "60vh", sm: "70vh", md: "80vh" },
+            borderRadius: 2,
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            fontSize: { xs: 25, sm: 23, md: 20 },
+          }}
+        ></StyledDataGrid>
+        <AddImageDialog
+          open={isOpen}
+          image={selectedImage}
+          onClose={() => setIsOpen(false)}
+          onRemoveImage={handleRemoveImage}
+          onChangeImage={openFileSelect}
+        />
+        <DeleteConfirmDialog
+          open={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setTaskToDeleteID(null);
+          }}
+          onConfirm={() => {
+            onDeleteTask(taskToDeleteID);
+            setIsDeleteDialogOpen(false);
+            setTaskToDeleteID(null);
 
-          toast.success("Row Deleted", {
-            position: "top-right",
-            autoClose: 1000,
-            hideProgressBar: true,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            theme: theme.palette.mode,
-          });
-        }}
-      />
-         
+            toast.success("Row Deleted", {
+              position: "top-right",
+              autoClose: 1000,
+              hideProgressBar: true,
+              closeOnClick: false,
+              pauseOnHover: true,
+              draggable: true,
+              theme: theme.palette.mode,
+            });
+          }}
+        />
+           
+      </Box>
       <ToastContainer
         position="top-right"
         autoClose={1000}
@@ -616,7 +708,7 @@ const GridView = ({
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme={theme.palette.mode}
       />
     </Box>
   );

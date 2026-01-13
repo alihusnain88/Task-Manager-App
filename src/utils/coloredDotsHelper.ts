@@ -1,5 +1,3 @@
-import type { Task } from "../types";
-
 export const STATUS_DOTS = {
   "backlog": "#c94040ff",
   "in-progress": "#f59e0b",
