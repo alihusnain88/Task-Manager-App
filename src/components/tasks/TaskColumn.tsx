@@ -103,7 +103,6 @@ const TaskColumn = ({
               mt: 1,
               px: { xs: 0.7, sm: 2, md: 2 },
               gap: { sm: 0.5, md: 2 }, 
-              height: { xs: 30, sm: 40, md: 30 },
               width: "100%",
               borderRadius: { xs: "8px", md: "10px" },
               fontSize: { xs: "0.55rem", sm: "0.9rem", md: "0.7rem" },
