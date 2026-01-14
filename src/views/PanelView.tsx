@@ -56,12 +56,12 @@ const PanelView = ({
           sx={{
             position: "fixed",
             right: 10,
-            top: 15,
+            top: {xs: 10, md: 15},
             color: "white",
             backgroundColor: "#7b1a1aff",
             borderRadius: 5,
             zIndex: 10,
-            mb: 1,
+            mb: {xs: 10},
           }}
         >
           <MenuIcon />
@@ -69,12 +69,14 @@ const PanelView = ({
       )}
       <Box
         sx={{
-          width: { xs: "105vw", sm: "100vw", md: "98vw" },
+          width: "100%",
           mt: 4,
           mb: 2,
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
           alignItems: "center",
+          gap: 2,
+          position: "relative"
         }}
       >
         <Button
@@ -89,10 +91,12 @@ const PanelView = ({
             fontSize: { xs: "0.75rem", md: "0.9rem" },
             px: { xs: 1.5, md: 2 },
             py: { xs: 0.5, md: 0.75 },
+            ml: 1,
+            mt: -2.5,
             whiteSpace: "nowrap",
             "&:hover": { backgroundColor: "#bc2222ff" },
           }}
-        >
+        > 
           Grid View
         </Button>
 
@@ -100,10 +104,14 @@ const PanelView = ({
           variant="h4"
           textAlign="center"
           sx={{
-            width: "100vw",
-            fontSize: { xs: "1rem", sm: "1.5rem", md: "2rem" },
+            fontSize: { xs: "1.2rem", sm: "1.6rem", md: "2rem" },
             fontWeight: "bold",
             color: "white",
+            mt: {xs: 10, sm: 6, md: 4},
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+            whiteSpace: 'nowrap'
           }}
         >
           Task Manager App
@@ -124,7 +132,7 @@ const PanelView = ({
           },
           borderRadius: theme.shape.borderRadius,
           p: { xs: 1, sm: 2, md: 1 },
-          mt: { xs: 3, sm: 2, md: 0 },
+          mt: { xs: 5, sm: 6, md: 7 },
           background: "linear-gradient(175deg, #1d244e 0%, #5f2c3f 100%)",
           display: "flex",
           flexDirection: { xs: "column", md: "row" },

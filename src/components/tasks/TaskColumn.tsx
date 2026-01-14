@@ -68,8 +68,10 @@ const TaskColumn = ({
             }}
           />
           <Typography
-            fontWeight={400}
-            fontSize={12}
+            sx={{
+              fontWeight: 400,
+              fontSize: {xs: 6, sm: 10, md: 12}
+            }}
           >{`${column.title} (${tasks?.length})`}</Typography>
         </Box>
 

@@ -714,7 +714,7 @@ const GridView = ({
           }}
         >
           Panel View
-        </Button>
+        </Button> 
            
         <Typography
           variant="h4"

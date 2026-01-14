@@ -87,7 +87,7 @@ const TaskCard = ({
         fontWeight={200}
         fontSize={10}
         lineHeight={1.4}
-        sx={{ color: theme.palette.text.primary }}
+        sx={{ color: theme.palette.text.primary, fontWeight: 200, fontSize: {xs: 8, sm: 10, md: 12}, lineHeight: 1.4}}
       >
         {task.title}
       </Typography>
@@ -103,7 +103,7 @@ const TaskCard = ({
                 bgcolor: style.bg,
                 color: style.text,
                 borderRadius: "6px",
-                fontSize: 6,
+                fontSize: {xs: 4, sm: 5, md: 6},
                 fontWeight: 700,
                 textTransform: "capitalize",
               }}
