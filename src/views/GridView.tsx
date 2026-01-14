@@ -692,9 +692,9 @@ const GridView = ({
           px: 1,
           mb: 1,
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
           alignItems: "center",
-          // border: '1px solid red'
+          position: "relative"
         }}
       >
         <Button
@@ -707,8 +707,10 @@ const GridView = ({
             color: "white",
             backgroundColor: "#7b1a1aff",
             fontSize: { xs: "0.75rem", md: "0.9rem" },
-            px: { xs: 1.5, md: 2 },
-            py: { xs: 0.5, md: 0.75 },
+            px: { xs: 1.9, md: 2 },
+            py: { xs: 0.7, md: 0.75 },
+            ml: 1,
+            mt: -2.5,
             whiteSpace: "nowrap",
             "&:hover": { backgroundColor: "#bc2222ff" },
           }}
@@ -722,9 +724,14 @@ const GridView = ({
           sx={{
             width: "100vw",
             textAlign: "center",
-            fontSize: { xs: "1rem", sm: "1.5rem", md: "2rem" },
+            fontSize: { xs: "1.5rem", sm: "1.7rem", md: "2rem" },
             fontWeight: "bold",
+            mt: {xs: 10, sm: 6, md: 4},
+            position: "absolute",
             color: "text.primary",
+            left: "50%",
+            transform: "translateX(-50%)",
+            whiteSpace: "nowrap"
           }}
         >
           Boards & Tasks Grid    
@@ -735,6 +742,7 @@ const GridView = ({
         sx={{
           width: "90%",
           overflowX: "auto",
+          mt: { xs: 4, sm: 5, md: 6 },
         }}
       >
         <StyledDataGrid
@@ -753,7 +761,7 @@ const GridView = ({
             color: theme.palette.text.primary,
             fontSize: { xs: 25, sm: 23, md: 20 },
           }}
-        ></StyledDataGrid>
+         />
         <AddImageDialog
           open={isOpen}
           image={selectedImage}
