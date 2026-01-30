@@ -6,4 +6,4 @@ export const getTagColor = (tag: string) => {
     return { bg: "#fce7f3", text: "#9d174d" };
   if (t.includes("front")) return { bg: "#dcfce7", text: "#09913dff" };
   return { bg: "#e2e8f0", text: "#485e7dff" };
-};
+}; 

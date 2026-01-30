@@ -1,40 +1,37 @@
 import { Button, useTheme, Box } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import BoardsList from "../boards/BoardsList";
 import AddBoardDialog from "../boards/AddBoardDialog";
 import ThemeToggleButtons from "../../theme/ThemeToggleButtons";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../../store";
-import { deleteBoard, setActiveBoardID } from "../../store/slices/boardsSlice";
-import { deleteTasksForBoard } from "../../store/slices/tasksSlice";
+import type { Board } from "../../types";
+import DeleteBoardDialog from "../boards/DeleteBoardDialog";
 
-const Sidebar = () => {
+interface SidebarProps {
+  boards: Board[];
+  activeBoardID: number | null;
+  setActiveBoardID: (id: number) => void;
+  onDeleteBoard: (id: number | null) => void;
+  onAddBoard: (board: Board) => void;
+}
+const Sidebar = ({
+  boards,
+  activeBoardID,
+  setActiveBoardID,
+  onDeleteBoard,
+  onAddBoard,
+}: SidebarProps) => {
   const theme = useTheme();
-  const dispatch = useDispatch<AppDispatch>();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const boardsList = useSelector((state: RootState) => state.boards.list);
-  const activeBoardID = useSelector(
-    (state: RootState) => state.boards.activeBoardID
-  );
-
-  const handleSelect = (id: string) => {
-    dispatch(setActiveBoardID(id));
-  };
-
-  const handleDelete = (id: string) => {
-    dispatch(deleteBoard(id));
-    dispatch(deleteTasksForBoard(id));
-  };
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false)
+  const [boardToDeleteID, setBoardToDeleteID] = useState<number | null>(null)
 
   return (
     <Box
       sx={{
-        minHeight: "100%",
+        height: "100%",
         overflowY: "auto",
         scrollbarWidth: "none",
-        width: "25%",
         pt: 2,
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary,
@@ -45,15 +42,18 @@ const Sidebar = () => {
     >
       <Box sx={{ flex: 1 }}>
         <BoardsList
-          boardsList={boardsList}
+          boards={boards}
           activeBoardID={activeBoardID}
-          onSelect={handleSelect}
-          onDelete={handleDelete}
+          setActiveBoardID={setActiveBoardID}
+          setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+          setBoardToDeleteID={setBoardToDeleteID}
         />
         <Button
           variant="text"
           startIcon={<AddCircleIcon />}
-          onClick={() => setIsOpen(true)}
+          disableElevation
+          disableRipple
+          onClick={() => setIsAddDialogOpen(true)}
           sx={{
             m: 1,
             textTransform: "none",
@@ -82,13 +82,16 @@ const Sidebar = () => {
       </Box>
 
       <AddBoardDialog
-        isOpen={isOpen}
-        setIsOpen={(open) => {
-          if (!open) setIsOpen(false);
-        }}
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        boards={boards}
+        onAddBoard={onAddBoard}
       />
+
+      <DeleteBoardDialog isOpen={isDeleteDialogOpen} onClose={()=> setIsDeleteDialogOpen(false)} onDeleteBoard={onDeleteBoard} boardToDeleteID={boardToDeleteID}/>
+
     </Box>
   );
 };
-
+ 
 export default Sidebar;

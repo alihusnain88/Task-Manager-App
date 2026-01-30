@@ -15,18 +15,21 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import { type Task, type TaskStatus } from "../../types";
-import { v4 as uuidv4 } from "uuid";
 import { useTheme } from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
-import { type RootState, type AppDispatch } from "../../store";
-import { addTask, updateTask } from "../../store/slices/tasksSlice";
 import { STATUS_DOTS } from "../../utils/coloredDotsHelper";
-import { Link } from "react-router";
 import { getTagColor } from "../../utils/tagColorsHelper";
+
 interface AddTaskDialogProps {
   isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-  task?: Task | null;
+  onClose: () => void;
+  totalTasksForBoard: number;
+  activeBoardID: number | null;
+  onAddTask: (task: Task) => void;
+  isEditing: boolean;
+  editingTask: Task | null;
+  onEditTask: (task: Task) => void;
+  setIsEditing: (isEditing: boolean) => void;
+  setEditingTask: (task: Task | null) => void;
 }
 
 const STATUS_OPTIONS: { key: TaskStatus; label: string }[] = [
@@ -36,12 +39,19 @@ const STATUS_OPTIONS: { key: TaskStatus; label: string }[] = [
   { key: "completed", label: "Completed" },
 ];
 
-const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
+const AddTaskDialog = ({
+  isOpen,
+  onClose,
+  totalTasksForBoard,
+  activeBoardID,
+  onAddTask,
+  isEditing,
+  editingTask,
+  onEditTask,
+  setIsEditing,
+  setEditingTask,
+}: AddTaskDialogProps) => {
   const theme = useTheme();
-  const dispatch = useDispatch<AppDispatch>();
-  const activeBoardID = useSelector(
-    (state: RootState) => state.boards.activeBoardID
-  );
 
   const [title, setTitle] = useState<string>("");
   const [status, setStatus] = useState<TaskStatus>("backlog");
@@ -51,22 +61,24 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
   const [background, setBackground] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      if (task) {
-        setTitle(task.title ?? "");
-        setStatus(task.status ?? "backlog");
-        setTags(task.tags ?? []);
-        setBackground(task.background ?? null);
-      } else {
-        setTitle("");
-        setStatus("backlog");
-        setTags([]);
-        setBackground(null);
-      }
-      setTagInput("");
-      setError("");
+    if (!isOpen) return;
+    if (
+      isEditing &&
+      editingTask !== null &&
+      editingTask.boardID === activeBoardID
+    ) {
+      setTitle(editingTask.title || "");
+      setStatus(editingTask.status || "backlog");
+      setTags(editingTask.tags || []);
+      setBackground(editingTask.background || null);
+    } else {
+      setTitle("");
+      setStatus("backlog");
+      setTags([]);
+      setBackground(null);
     }
-  }, [task, isOpen]);
+    setError("");
+  }, [isOpen, isEditing, editingTask, activeBoardID]);
 
   const handleAddTag = () => {
     const newTag = tagInput.trim();
@@ -80,29 +92,33 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
       setError("Name required");
       return;
     }
-    if (!activeBoardID) return;
+    if (activeBoardID === null) return;
 
-    const newTask: Task = {
-      id: task?.id ?? uuidv4(),
-      title,
-      status,
-      tags,
-      background,
-    };
-
-    if (task) {
-      dispatch(updateTask({ boardID: activeBoardID, task: newTask }));
+    if (editingTask) {
+      onEditTask({
+        ...editingTask,
+        title,
+        status,
+        tags,
+        background,
+      });
     } else {
-      dispatch(addTask({ boardID: activeBoardID, task: newTask }));
+      onAddTask({
+        taskID: Date.now(),
+        boardID: activeBoardID,
+        title,
+        status,
+        tags,
+        background,
+        priority: totalTasksForBoard + 1,
+      });
     }
-
-    setTitle("");
-    setStatus("backlog");
-    setTags([]);
-    setTagInput("");
-    setBackground(null);
-    setError("");
-    setIsOpen(false);
+    handleCloseDialog();
+  };
+  const handleCloseDialog = () => {
+    setIsEditing(false);
+    setEditingTask(null);
+    onClose();
   };
 
   const inputSx = {
@@ -118,7 +134,7 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
   return (
     <Dialog
       open={isOpen}
-      onClose={() => setIsOpen(false)}
+      onClose={handleCloseDialog}
       maxWidth={false}
       slotProps={{
         backdrop: {
@@ -127,10 +143,14 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
         paper: {
           sx: {
             position: "fixed",
-            right: 30,
-            top: "35%",
-            width: "20vw",
-            maxHeight: "60vh",
+            right: { xs: "auto", sm: 25, md: 30 },
+            top: { xs: "25%", sm: "30%", md: "35%" },
+            width: {
+              xs: "60vw",
+              sm: "40vw",
+              md: "22vw",
+            },
+            maxHeight: { xs: "75vh", sm: "65vh", md: "55vh" },
             borderRadius: "20px",
             background: `
             linear-gradient(#121212, #121212) padding-box,
@@ -138,6 +158,7 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
           `,
             border: "6px solid transparent",
             boxShadow: "0 20px 50px rgba(0, 0, 0, 0.6)",
+            scrollbarWidth: 'none'
           },
         },
       }}
@@ -147,35 +168,23 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          background: theme.palette.background.default,
+          background: theme.palette.background.paper,
         }}
       >
         <DialogTitle
           sx={{
-            color: "#cecaca",
+            color: theme.palette.text.primary,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             px: 2,
-            fontSize: 14,
+            fontSize: { xs: 20, sm: 18, md: 14 },
             fontWeight: "bold",
             pb: 1,
           }}
         >
           Task Details
-          <Link to={`tasks/${task?.id}`}>
-            <Typography
-              sx={{
-                textAlign: "center",
-                color: "#fff",
-                textDecoration: "underline",
-                fontSize: 14,
-              }}
-            >
-              Open
-            </Typography>
-          </Link>
-          <IconButton onClick={() => setIsOpen(false)} size="small">
+          <IconButton onClick={handleCloseDialog} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -195,7 +204,9 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
             sx={{
               width: "100%",
               height: 50,
-              border: !background ? "1px dashed #9d9d9d" : "none",
+              border: !background
+                ? `1px dashed ${theme.palette.text.primary}`
+                : "none",
               borderRadius: "4px",
               display: "flex",
               justifyContent: "center",
@@ -209,7 +220,9 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
             onClick={() => document.getElementById("task-image-input")?.click()}
           >
             {!background && (
-              <Typography sx={{ fontSize: "0.65rem", color: "#9d9d9d" }}>
+              <Typography
+                sx={{ fontSize: "0.65rem", color: theme.palette.text.primary }}
+              >
                 Click to upload
               </Typography>
             )}
@@ -252,9 +265,9 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
 
           <Box>
             <Typography
-              fontSize="0.5rem"
+              fontSize={{ xs: "0.9rem", sm: "0.8rem", md: "0.7rem" }}
               gutterBottom
-              sx={{ color: "#9d9d9d" }}
+              sx={{ color: theme.palette.text.primary }}
             >
               Task Name
             </Typography>
@@ -274,9 +287,9 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
 
           <Box>
             <Typography
-              fontSize="0.5rem"
+              fontSize={{ xs: "0.9rem", sm: "0.8rem", md: "0.7rem" }}
               gutterBottom
-              sx={{ color: "#9d9d9d" }}
+              sx={{ color: theme.palette.text.primary }}
             >
               Status
             </Typography>
@@ -291,7 +304,6 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
                 renderValue: (selected) => {
                   const option = STATUS_OPTIONS.find((s) => s.key === selected);
                   const dotColor = STATUS_DOTS[selected as TaskStatus];
-
                   return (
                     <Box
                       sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
@@ -308,7 +320,7 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
                         sx={{
                           fontSize: "0.75rem",
                           fontWeight: 500,
-                          color: "#fff",
+                          color: theme.palette.text.primary,
                         }}
                       >
                         {option?.label}
@@ -323,12 +335,6 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
                   paddingRight: "8px !important",
                   display: "flex",
                   alignItems: "center",
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#2d2d2d",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#404040",
                 },
               }}
             >
@@ -359,9 +365,9 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
 
           <Box>
             <Typography
-              fontSize="0.5rem"
+              fontSize={{ xs: "0.9rem", sm: "0.8rem", md: "0.7rem" }}
               gutterBottom
-              sx={{ color: "#9d9d9d" }}
+              sx={{ color: theme.palette.text.primary }}
             >
               Tags
             </Typography>
@@ -372,7 +378,7 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
                   key={tag}
                   label={tag}
                   onDelete={() => setTags(tags.filter((curr) => curr !== tag))}
-                  sx={{
+                  sx={{ 
                     bgcolor: style.bg,
                     color: style.text,
                     m: 0.4,
@@ -403,27 +409,55 @@ const AddTaskDialog = ({ isOpen, setIsOpen, task }: AddTaskDialogProps) => {
             pb: 2,
             pt: 0,
             display: "flex",
-            justifyContent: "start",
+            justifyContent: { xs: "space-evenly", md: "start" },
+            gap: 1,
             marginTop: "4px",
           }}
         >
           <Button
             variant="contained"
+            disableElevation
+            disableRipple
             endIcon={<CheckIcon />}
             onClick={handleSave}
             size="small"
-            sx={{ fontSize: "0.7rem", color: "#ebe9e9", borderRadius: "20px" }}
+            sx={{
+              fontSize: "0.7rem",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgb(195, 218, 250)"
+                  : "rgb(81, 81, 81)",
+              color:
+                theme.palette.mode === "dark"
+                  ? "rgb(51, 86, 211)"
+                  : "rgb(242, 242, 242)",
+              borderRadius: "20px",
+              "&: hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgb(195, 218, 250)"
+                    : "rgb(81, 81, 81)",
+              },
+            }}
           >
             Save
           </Button>
           <Button
             variant="outlined"
+            disableElevation
+            disableRipple
             size="small"
-            onClick={() => setIsOpen(false)}
+            onClick={handleCloseDialog}
             sx={{
-              border: "1.5px solid #696969",
               fontSize: "0.7rem",
+              border: "1.5px solid #696969",
               background: "none",
+              "&: hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgb(65, 65, 65)"
+                    : "rgb(196, 196, 196)",
+              },
             }}
           >
             Cancel

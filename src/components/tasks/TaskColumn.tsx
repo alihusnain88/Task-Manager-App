@@ -1,62 +1,53 @@
-import React from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Container, useTheme } from "@mui/material";
 import TaskCard from "./TaskCard";
 import AddIcon from "@mui/icons-material/Add";
-import { type Task } from "../../types";
-import { useDispatch, useSelector } from "react-redux";
-import { moveTask } from "../../store/slices/tasksSlice";
-import { type RootState, type AppDispatch } from "../../store";
 import { STATUS_DOTS } from "../../utils/coloredDotsHelper";
-interface Column {
-  key: Task["status"];
-  title: string;
-}
+import type { Column, Task, TaskStatus } from "../../types";
 
 interface TaskColumnProps {
+  activeBoardID: number;
   column: Column;
   tasks: Task[];
-  onTaskClick: (task: Task) => void;
-  onAddTask: () => void;
+  onOpen: () => void;
+  onMoveTask: (taskID: number, newStatus: TaskStatus, toIndex: number) => void;
+  setIsOpen: (isOpen: boolean) => void;
+  editingTask: Task | null;
+  setEditingTask: (task: Task | null) => void;
+  isEditing: boolean;
+  setIsEditing: (isEditing: boolean) => void;
 }
 
 const TaskColumn = ({
+  activeBoardID,
   column,
   tasks,
-  onTaskClick,
-  onAddTask,
+  onOpen,
+  onMoveTask,
+  setIsOpen,
+  editingTask,
+  setEditingTask,
+  isEditing,
+  setIsEditing,
 }: TaskColumnProps) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const activeBoardID = useSelector(
-    (state: RootState) => state.boards.activeBoardID
-  );
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
+  
+  const sortedTasks = [...tasks].sort((a, b) => a.priority - b.priority);
+  const theme = useTheme()
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (!activeBoardID) return;
+    e.preventDefault(); 
 
-    const taskID = e.dataTransfer.getData("taskID");
-    const oldStatus = e.dataTransfer.getData("taskStatus") as Task["status"];
+    const data = JSON.parse(e.dataTransfer.getData("application/json"));
 
-    if (taskID && oldStatus !== column.key) {
-      dispatch(
-        moveTask({
-          boardID: activeBoardID,
-          taskID,
-          newStatus: column.key,
-        })
-      );
-    }
+    onMoveTask(data.taskID, column.key, sortedTasks?.length || 0);
   };
 
   return (
-    <div
+    <Container
+      disableGutters
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      style={{ minWidth: "25%" }}
+      sx={{ minWidth: "25%", minHeight: "100%" }}
     >
       <Box sx={{ flex: 1, p: 0, minHeight: "100%" }}>
         <Box
@@ -76,17 +67,27 @@ const TaskColumn = ({
               bgcolor: STATUS_DOTS[column.key],
             }}
           />
-          <Typography fontWeight={400} fontSize={12}>
-            {`${column.title} (${tasks.length})`}
-          </Typography>
+          <Typography
+            sx={{
+              fontWeight: 400,
+              fontSize: {xs: 6, sm: 10, md: 12}
+            }}
+          >{`${column.title} (${tasks?.length})`}</Typography>
         </Box>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-          {tasks.map((task) => (
+          {sortedTasks?.map((task, index) => (
             <TaskCard
-              key={task.id}
+              key={task.taskID}
+              activeBoardID={activeBoardID}
               task={task}
-              onClick={() => onTaskClick(task)}
+              index={index}
+              onMoveTask={onMoveTask}
+              setIsOpen={setIsOpen}
+              editingTask={editingTask}
+              setEditingTask={setEditingTask}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
             />
           ))}
         </Box>
@@ -94,30 +95,27 @@ const TaskColumn = ({
         {column.key === "backlog" && (
           <Button
             variant="contained"
-            onClick={onAddTask}
+            disableElevation
+            disableRipple
+            onClick={onOpen}
             endIcon={<AddIcon />}
             sx={{
               mt: 1,
-              gap: 2,
-              height: "30px",
-              maxWidth: "100%",
+              px: { xs: 0.7, sm: 2, md: 2 },
+              gap: { sm: 0.5, md: 2 }, 
               width: "100%",
-              borderRadius: "10px",
-              fontSize: "0.7rem",
-              backgroundColor: "rgb(195 218 250)",
-              color: "rgb(51 86 211)",
-              "&:hover": {
-                backgroundColor: "gray",
-                color: "white",
-                transition: "none",
-              },
+              borderRadius: { xs: "8px", md: "10px" },
+              fontSize: { xs: "0.55rem", sm: "0.9rem", md: "0.7rem" },
+              backgroundColor: theme.palette.mode === "dark" ? "rgb(195, 218, 250)" : "rgb(81, 81, 81)",
+              color: theme.palette.mode === "dark" ? "rgb(51, 86, 211)" : "rgb(242, 242, 242)",
+              "&:hover": { backgroundColor: theme.palette.mode === "dark" ? "rgb(168, 198, 239)" : "rgb(75, 75, 75)"},
             }}
           >
             Add new task card
           </Button>
         )}
       </Box>
-    </div>
+    </Container>
   );
 };
 

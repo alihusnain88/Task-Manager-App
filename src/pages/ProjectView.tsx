@@ -1,32 +1,25 @@
-import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import type { RootState } from "../store";
 import { Container, List, ListItem, Typography } from "@mui/material";
+import type {Board, Task} from '../types'
 
-const ProjectView = () => {
+const ProjectView = ({boards, allTasks}: {boards: Board[], allTasks: Task[]}) => {
     
-  const { projectID } = useParams<{ projectID: string }>();
-  const project = useSelector((state: RootState) =>
-    state.boards.list.find((b) => b.id === projectID)
-  );
+  const { boardID } = useParams();
+  const board = boards.find((board) => board.id===Number(boardID))
 
-  const tasks = useSelector((state: RootState) =>
-    projectID ? state.tasks.byBoardID[projectID] ?? [] : []
-  );
-
-  if (!project) return <Typography>Project not found</Typography>;
+  if (!board) return <Typography>Project not found</Typography>;
 
   return (
     <Container sx={{mt: 4}}>
-      <Typography variant="h4" mb={2}>{`${project.emoji} ${project.name}`}</Typography>
+      <Typography variant="h4" mb={2}>{`${board.logo} ${board.name}`}</Typography>
       <Typography variant="h5" m={2} >Tasks: </Typography>
       <List>
-        {tasks.map((t) => (
-          <ListItem key={t.id}>{t.id}. {t.title} - {t.status}</ListItem>
+        {allTasks.map((t, index) => (
+          t.boardID===board.id && (<ListItem key={t.taskID}>{index}. {t.title} - {t.status}</ListItem>)
         ))}
       </List>
     </Container>
   );
 };
 
-export default ProjectView;
+export default ProjectView; 

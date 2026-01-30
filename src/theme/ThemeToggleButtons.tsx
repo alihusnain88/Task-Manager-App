@@ -41,7 +41,7 @@ const ThemeToggleButtons = () => {
               ? activeStyle.hoverBg || activeStyle.bgcolor
               : inactiveStyle.hoverBg,
           },
-        }}
+        }} 
       >
         Dark
       </Button>
@@ -51,7 +51,7 @@ const ThemeToggleButtons = () => {
         startIcon={<LightModeIcon />}
         disableElevation
         disableRipple
-        sx={{
+        sx={{ 
           flex: 1,
           borderRadius: '10px',
           textTransform: 'none',

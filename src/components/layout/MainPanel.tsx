@@ -1,79 +1,95 @@
-import { Container, useTheme } from "@mui/material";
-import React from "react";
+import { Box, Typography, useTheme } from "@mui/material";
+import { useState } from "react";
 import TaskColumn from "../tasks/TaskColumn";
 import AddTaskDialog from "../tasks/AddTaskDialog";
-import { type Task } from "../../types";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../../store";
-import {
-  openAddTaskDialog,
-  openEditTaskDialog,
-  closeTaskDialog,
-} from "../../store/slices/tasksSlice";
+import type { Column, Task, TaskStatus } from "../../types";
 
-const COLUMNS = [
+interface MainPanelProps {
+  activeBoardID: number | null;
+  tasksForBoard: Task[];
+  totalBoards: number | null;
+  totalTasksForBoard: number;
+  onAddTask: (task: Task) => void;
+  onMoveTask: (taskID: number, newStatus: TaskStatus, toIndex: number) => void;
+  onEditTask: (task: Task) => void;
+}
+const COLUMNS: Column[] = [
   { key: "backlog", title: "Backlogs" },
   { key: "in-progress", title: "In Progress" },
   { key: "in-review", title: "In Review" },
   { key: "completed", title: "Completed" },
 ] as const;
 
-interface MainPanelProps {
-  tasks: Task[];
-  onAddTask: (task: Task, isEdit: boolean) => void;
-}
-
-const MainPanel = ({ tasks }: MainPanelProps) => {
-  const dispatch = useDispatch<AppDispatch>();
+const MainPanel = ({
+  activeBoardID,
+  tasksForBoard,
+  totalBoards,
+  totalTasksForBoard,
+  onAddTask,
+  onMoveTask,
+  onEditTask,
+}: MainPanelProps) => {
   const theme = useTheme();
-
-  const isOpen = useSelector(
-    (state: RootState) => state.tasks.isTaskDialogOpen
-  );
-  const editingTask = useSelector(
-    (state: RootState) => state.tasks.editingTask
-  );
-
-  const handleTaskClick = (task: Task) => {
-    if (task.status === "backlog" && task.title === "Add your backlogs here")
-      return;
-    dispatch(openEditTaskDialog(task));
-  };
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   return (
-    <Container
-      sx={{
-        minHeight: "100%",
-        overflow: "scroll",
+    <Box
+    sx={{
+        flex: 1,
+        height: "100%",
         scrollbarWidth: "none",
         backgroundColor: theme.palette.background.default,
-        flex: 1,
         borderRadius: "10px",
         display: "flex",
-        padding: 2,
+        alignItems: "flex-start",
         gap: 0.8,
+        px: { xs: 2, sm: 3, md: 4 },
+        py: 2,
+        overflowX: { xs: "auto", md: "hidden" },
+        overflowY: "auto",
       }}
     >
-      {COLUMNS.map((col) => (
-        <TaskColumn
-          key={col.key}
-          column={col}
-          tasks={tasks.filter((t) => t.status === col.key)}
-          onTaskClick={handleTaskClick}
-          onAddTask={() => {
-            dispatch(openAddTaskDialog());
-          }}
-        />
-      ))}
+      {totalBoards! > 0 && activeBoardID !== null ? (
+        COLUMNS.map((col) => (
+          <TaskColumn
+            key={col.key}
+            activeBoardID={activeBoardID}
+            column={col}
+            tasks={tasksForBoard?.filter((task) => task.status === col.key)}
+            onOpen={() => {
+              setEditingTask(null);
+              setIsEditing(false);
+              setIsOpen(true);
+            }}
+            onMoveTask={onMoveTask}
+            setIsOpen={setIsOpen}
+            editingTask={editingTask}
+            setEditingTask={setEditingTask}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+          />
+        ))
+      ) : (
+        <Typography width="100%" textAlign="center">
+          Add or select a board to see tasks.
+        </Typography>
+      )}
 
       <AddTaskDialog
         isOpen={isOpen}
-        setIsOpen={(open) => {
-          if (!open) dispatch(closeTaskDialog());
-        }}
-        task={editingTask}
+        onClose={() => setIsOpen(false)}
+        totalTasksForBoard={totalTasksForBoard}
+        activeBoardID={activeBoardID}
+        onAddTask={onAddTask}
+        editingTask={editingTask}
+        isEditing={isEditing}
+        onEditTask={onEditTask} 
+        setIsEditing={setIsEditing}
+        setEditingTask={setEditingTask}
       />
-    </Container>
+    </Box>
   );
 };
 

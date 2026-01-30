@@ -1,0 +1,103 @@
+{
+  "boards": [
+    {
+      "id": 0,
+      "name": "Personal Tasks",
+      "logo": "🏠"
+    },
+    {
+      "id": 1,
+      "name": "Work Projects",
+      "logo": "💼"
+    },
+    {
+      "id": 2,
+      "name": "Shopping & Errands",
+      "logo": "🛒"
+    }
+  ],
+
+  "tasks": [
+    {
+      "boardID": 0,
+      "taskID": 0,
+      "title": "Clean the apartment",
+      "status": "backlog",
+      "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
+      "tags": ["Home", "Weekend", "Cleaning"],
+      "priority": 2
+    },
+    {
+      "boardID": 0,
+      "taskID": 1,
+      "title": "Pay electricity bill",
+      "status": "in-review",
+      "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
+      "tags": ["Finance", "Urgent"],
+      "priority": 2
+    },
+    {
+      "boardID": 0,
+      "taskID": 2,
+      "title": "Go for a morning walk",
+      "status": "completed",
+      "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
+      "tags": ["Health", "Routine"],
+      "priority": 1
+    },
+    {
+      "boardID": 1,
+      "taskID": 3,
+      "title": "Prepare weekly team report",
+      "status": "backlog",
+      "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
+      "tags": ["Work", "Reporting"],
+      "priority": 2
+    },
+    {
+      "boardID": 1,
+      "taskID": 4,
+      "title": "Fix login page bug",
+      "status": "in-review",
+      "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
+      "tags": ["Bug", "High Priority"],
+      "priority": 1
+    },
+    {
+      "boardID": 1,
+      "taskID": 5,
+      "title": "Client meeting presentation",
+      "status": "completed",
+      "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
+      "tags": ["Meeting", "Presentation"],
+      "priority": 2
+    },
+    {
+      "boardID": 2,
+      "taskID": 6,
+      "title": "Buy groceries",
+      "status": "backlog",
+      "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
+      "tags": ["Food", "Essentials"],
+      "priority": 1
+    },
+    {
+      "boardID": 2,
+      "taskID": 7,
+      "title": "Pick up laundry",
+      "status": "in-progress",
+      "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
+      "tags": ["Errands"],
+      "priority": 2
+    },
+    {
+      "boardID": 2,
+      "taskID": 8,
+      "title": "Order birthday gift",
+      "status": "in-review",
+      "background": "https://github.com/devchallenges-io/curriculum/blob/main/4-frontend-libaries/challenges/group_1/data/task-manager/image-4.jpg?raw=true",
+      "tags": ["Gift", "Family"],
+      "priority": 1
+    }
+  ]
+}
